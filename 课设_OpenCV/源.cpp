@@ -27,7 +27,7 @@ using namespace cv;
 
 
 //初始化
-void windowInit();
+void windowInit(); //OpenCV
 void gameFramwork(struct Settings settings);
 //struct PLAYER *initPlayer();
 void initPlayer(struct PLAYER *player1, struct PLAYER *player2);
@@ -82,6 +82,12 @@ int AIMove(struct PLAYER *player, struct ITEM *item);
 void playerBubbleSort(struct PLAYER a[], int len);
 void Save(struct PLAYER *player);
 void showScore();
+
+//OpenCV
+void overlayImage(Mat* src, Mat* overlay, const Point& location);
+void Move();
+void on_mouse(int EVENT, int x, int y, int flags, void* userdata);
+
 
 //void on_mouse(int EVENT, int x, int y, int flags, void* userdata)
 //{
@@ -192,50 +198,24 @@ int ItemCount = 0;
 const int ItemNumber = 10;//屏幕上物品的总数
 
 IMAGE background, lost, cake, umbrella, bomb_a, bomb_b, imgplayer;
-Mat allBackground(600, 800, CV_8UC3, Scalar(0, 0, 0)), startBackground, start_b;
+Mat allBackground(600, 800, CV_8UC3, Scalar(0, 0, 0)), startBackground, startBackgroundBackUp, start_b_h, start_b_n, help_b_h, help_b_n, mode_b_h, mode_b_n, settings_b_h, settings_b_n, rank_b_h, rank_b_n, exit_b_h, exit_b_n;
 String windowName("测试");
 
 int main()
 {
 	windowInit();
 	loadAllImages();
+	//imshow(windowName, allBackground);
+	//overlayImage(&allBackground, &startBackground, Point(0, 0));
 	imshow(windowName, startBackground);
-	waitKey(0);
-	
-
-	double alpha = 0.5; double beta; double input;
-
-	Mat src1, src2, dst;
-
-	/// Ask the user enter alpha
-	std::cout << " Simple Linear Blender " << std::endl;
-	std::cout << "-----------------------" << std::endl;
-	std::cout << "* Enter alpha [0-1]: ";
-	std::cin >> input;
-
-	// We use the alpha provided by the user iff it is between 0 and 1
-	if (alpha >= 0 && alpha <= 1)
+	Menu();
+	setMouseCallback(windowName, on_mouse, &startBackground);
+	while (1)
 	{
-		alpha = input;
+		imshow(windowName, startBackground);
+		waitKey(33);
 	}
-
-	/// Read image ( same size, same type )
-	src1 = imread("img\\bkg.jpg");
-	src2 = imread("img\\rank_h.png");
-
-	if (!src1.data) { printf("Error loading src1 \n"); return -1; }
-	if (!src2.data) { printf("Error loading src2 \n"); return -1; }
-
-	/// Create Windows
-	namedWindow("Linear Blend", 1);
-
-	beta = (1.0 - alpha);
-	addWeighted(src1, alpha, src2, beta, 0.0, dst);
-
-	imshow("Linear Blend", dst);
-
-
-	waitKey(0);
+	//Move();
 	return 0;
 	//line(allBackground, Point(0, BORDER), Point(WIDTH, BORDER), Scalar(255, 255, 255));
 	////开始按钮
@@ -326,8 +306,20 @@ void initItemToZero()
 
 void loadAllImages()
 {
-	startBackground = imread("img\\bkg.jpg", IMREAD_COLOR);
-	start_b = imread("img\\rank_h.png", IMREAD_COLOR);
+	startBackground = imread("img\\bkg.png", CV_LOAD_IMAGE_UNCHANGED);
+	startBackgroundBackUp = imread("img\\bkg.png", CV_LOAD_IMAGE_UNCHANGED);
+	start_b_h = imread("img\\buttons\\start_h.png", CV_LOAD_IMAGE_UNCHANGED);
+	start_b_n = imread("img\\buttons\\start_n.png", CV_LOAD_IMAGE_UNCHANGED);
+	help_b_h = imread("img\\buttons\\help_h.png", CV_LOAD_IMAGE_UNCHANGED);
+	help_b_n = imread("img\\buttons\\help_n.png", CV_LOAD_IMAGE_UNCHANGED);
+	mode_b_h = imread("img\\buttons\\mode_h.png", CV_LOAD_IMAGE_UNCHANGED);
+	mode_b_n = imread("img\\buttons\\mode_n.png", CV_LOAD_IMAGE_UNCHANGED);
+	settings_b_h = imread("img\\buttons\\settings_h.png", CV_LOAD_IMAGE_UNCHANGED);
+	settings_b_n = imread("img\\buttons\\settings_n.png", CV_LOAD_IMAGE_UNCHANGED);
+	rank_b_h = imread("img\\buttons\\rank_h.png", CV_LOAD_IMAGE_UNCHANGED);
+	rank_b_n = imread("img\\buttons\\rank_n.png", CV_LOAD_IMAGE_UNCHANGED);
+	exit_b_h = imread("img\\buttons\\exit_h.png", CV_LOAD_IMAGE_UNCHANGED);
+	exit_b_n = imread("img\\buttons\\exit_n.png", CV_LOAD_IMAGE_UNCHANGED);
 	/*loadimage(&background, _T("MyImage"), MAKEINTRESOURCE(4));
 	loadimage(&cake, _T("img\\cake.jpg"), 40, 40);
 	loadimage(&umbrella, _T("img\\umbrella.gif"), 40, 40);
@@ -573,78 +565,77 @@ void drawTransparent(IMAGE trans_a, IMAGE trans_b)
 //界面函数
 void Menu()
 {
-	cleardevice();
 	while (1)
 	{
-		BeginBatchDraw();
-		setfillcolor(CYAN);
-		switch (settings.mode)
+		
+		//TODO 需要
+		/*switch (settings.mode)
 		{
 		case 1:fillrectangle(460, 240, 460 + 100, 240 + 50); break;
 		case 2:fillrectangle(570, 240, 570 + 100, 240 + 50); break;
 		case 3:fillrectangle(680, 240, 680 + 100, 240 + 50); break;
-		}
-		setlinecolor(WHITE);
-		setbkmode(TRANSPARENT);
+		}*/
+		//setlinecolor(WHITE);
+		//setbkmode(TRANSPARENT);
 		//开始
-		RECT start = { 350, 120, 350 + 100, 120 + 50 };
-		rectangle(350, 120, 350 + 100, 120 + 50);
-		drawtext(_T("开始游戏"), &start, DT_CENTER | DT_SINGLELINE | DT_VCENTER);
+		Rect start(350, 120, 100, 50);
+		overlayImage(&startBackground, &start_b_n, Point(250, 120));
+		
 		//帮助
-		RECT help = { 350, 180, 350 + 100, 180 + 50 };
-		rectangle(350, 180, 350 + 100, 180 + 50);
-		drawtext(_T("帮助"), &help, DT_CENTER | DT_SINGLELINE | DT_VCENTER);
+		Rect help(350, 180, 100, 50);
+		overlayImage(&startBackground, &help_b_n, Point(250, 120 + 70));
+		
 		//设置/模式
 		RECT mode = { 350, 240, 350 + 100, 240 + 50 };
-		rectangle(350, 240, 350 + 100, 240 + 50);
-		drawtext(_T("模式"), &mode, DT_CENTER | DT_SINGLELINE | DT_VCENTER);
+		overlayImage(&startBackground, &mode_b_n, Point(250, 120 + 70 + 70));
 		//单人
-		RECT singleplayer = { 460, 240, 460 + 100, 240 + 50 };
-		rectangle(460, 240, 460 + 100, 240 + 50);
-		drawtext(_T("单人"), &singleplayer, DT_CENTER | DT_SINGLELINE | DT_VCENTER);
+		//RECT singleplayer = { 460, 240, 460 + 100, 240 + 50 };
+		//overlayImage(&startBackground, &help_b_n, Point(250, 120));
+
 		//双人
-		RECT multiplayer = { 570, 240, 570 + 100, 240 + 50 };
+		/*RECT multiplayer = { 570, 240, 570 + 100, 240 + 50 };
 		rectangle(570, 240, 570 + 100, 240 + 50);
-		drawtext(_T("双人"), &multiplayer, DT_CENTER | DT_SINGLELINE | DT_VCENTER);
+		drawtext(_T("双人"), &multiplayer, DT_CENTER | DT_SINGLELINE | DT_VCENTER);*/
 		//AI
-		RECT ai = { 680, 240, 680 + 100, 240 + 50 };
+		/*RECT ai = { 680, 240, 680 + 100, 240 + 50 };
 		rectangle(680, 240, 680 + 100, 240 + 50);
-		drawtext(_T("AI"), &ai, DT_CENTER | DT_SINGLELINE | DT_VCENTER);
+		drawtext(_T("AI"), &ai, DT_CENTER | DT_SINGLELINE | DT_VCENTER);*/
 		//排名
 		RECT rank = { 350, 300, 350 + 100, 300 + 50 };
-		rectangle(350, 300, 350 + 100, 300 + 50);
-		drawtext(_T("排名"), &rank, DT_CENTER | DT_SINGLELINE | DT_VCENTER);
+		overlayImage(&startBackground, &rank_b_n, Point(250, 120 + 70 + 70 + 70));
 		//退出
 		RECT exit = { 350, 360, 350 + 100, 360 + 50 };
-		rectangle(350, 360, 350 + 100, 360 + 50);
-		drawtext(_T("退出"), &exit, DT_CENTER | DT_SINGLELINE | DT_VCENTER);
+		overlayImage(&startBackground, &exit_b_n, Point(250, 120 + 70 + 70 + 70 + 70));
+		imshow(windowName, startBackground);
+		
+		cvWaitKey(33);
+		break;
+		//setfillcolor(CYAN);
+		////FlushBatchDraw();
+		//EndBatchDraw();
+		//BeginBatchDraw();
+		//switch (judgeMouse())
+		//{
+		//case ON_START: fillrectangle(350, 120, 350 + 100, 120 + 50);  break;
+		//case HIT_START: gameStart(); break;
+		//case ON_HELP: fillrectangle(350, 180, 350 + 100, 180 + 50); break;
+		//	//case HIT_HELP: Help(); break;
+		//case ON_SINGLE: fillrectangle(460, 240, 460 + 100, 240 + 50); break;
+		//case HIT_SINGLE: settings.mode = 1; break;
+		//case ON_MULTI: fillrectangle(570, 240, 570 + 100, 240 + 50); break;
+		//case HIT_MULTI: settings.mode = 2; break;
+		//case ON_AI: fillrectangle(680, 240, 680 + 100, 240 + 50); break;
+		//case HIT_AI: settings.mode = 3; break;
+		//case ON_RANK: fillrectangle(350, 300, 350 + 100, 300 + 50); break;
+		//	//case HIT_RANK: Rank(); break;
+		//case ON_EXIT: fillrectangle(350, 360, 350 + 100, 360 + 50); break;
+		//case HIT_EXIT: Exit(); break;
 
-		setfillcolor(CYAN);
-		//FlushBatchDraw();
-		EndBatchDraw();
-		BeginBatchDraw();
-		switch (judgeMouse())
-		{
-		case ON_START: fillrectangle(350, 120, 350 + 100, 120 + 50);  break;
-		case HIT_START: gameStart(); break;
-		case ON_HELP: fillrectangle(350, 180, 350 + 100, 180 + 50); break;
-			//case HIT_HELP: Help(); break;
-		case ON_SINGLE: fillrectangle(460, 240, 460 + 100, 240 + 50); break;
-		case HIT_SINGLE: settings.mode = 1; break;
-		case ON_MULTI: fillrectangle(570, 240, 570 + 100, 240 + 50); break;
-		case HIT_MULTI: settings.mode = 2; break;
-		case ON_AI: fillrectangle(680, 240, 680 + 100, 240 + 50); break;
-		case HIT_AI: settings.mode = 3; break;
-		case ON_RANK: fillrectangle(350, 300, 350 + 100, 300 + 50); break;
-			//case HIT_RANK: Rank(); break;
-		case ON_EXIT: fillrectangle(350, 360, 350 + 100, 360 + 50); break;
-		case HIT_EXIT: Exit(); break;
-
-		case OFF:cleardevice(); break;
-		}
+		//case OFF:cleardevice(); break;
+		//}
 	}
 
-	EndBatchDraw();
+	//EndBatchDraw();
 }
 
 int Pause(struct PLAYER *player1, struct PLAYER *player2)
@@ -1082,4 +1073,64 @@ void showScore()
 		FlushBatchDraw();
 	}
 	fclose(fp);
+}
+
+void overlayImage(Mat* src, Mat* overlay, const Point& location)
+{
+	for (int y = max(location.y, 0); y < src->rows; ++y)
+	{
+		int fY = y - location.y;
+
+		if (fY >= overlay->rows)
+			break;
+
+		for (int x = max(location.x, 0); x < src->cols; ++x)
+		{
+			int fX = x - location.x;
+
+			if (fX >= overlay->cols)
+				break;
+
+			double opacity = ((double)overlay->data[fY * overlay->step + fX * overlay->channels() + 3]) / 255;
+
+			for (int c = 0; opacity > 0 && c < src->channels(); ++c)
+			{
+				unsigned char overlayPx = overlay->data[fY * overlay->step + fX * overlay->channels() + c];
+				unsigned char srcPx = src->data[y * src->step + x * src->channels() + c];
+				src->data[y * src->step + src->channels() * x + c] = srcPx * (1. - opacity) + overlayPx * opacity;
+			}
+		}
+	}
+}
+
+void Move()
+{
+	for (int i = 0; i < 70; i+=1)
+	{
+		overlayImage(&startBackground, &startBackgroundBackUp, Point(0, 0));
+		//overlayImage(&startBackground, &exit_b_n, Point(250, 120 + 70 + 70 + 70 + 70 + i));
+		
+		imshow(windowName, startBackground);
+		cvWaitKey(100);
+	}
+}
+
+void on_mouse(int EVENT, int x, int y, int flags, void* userdata)
+{
+	Mat hh;
+	hh = *(Mat*)userdata;
+	Point p(x, y);
+
+	// 鼠标按下的响应事件 位置在按钮1上画红色圆点 按钮2上画蓝色圆点 根据需要自行更改
+	switch (EVENT)
+	{
+	case EVENT_LBUTTONDOWN:
+	{
+		if (x >= 350 && x <= 350 + 100 && y >= 120 && y <= 120 + 50)
+			circle(hh, p, 2, Scalar(0, 0, 255), 3);
+		//if (x >= b_seat2.x && x <= b_seat2.x + b_seat2.width && y >= b_seat2.y && y <= b_seat2.y + b_seat2.height)
+			//circle(hh, p, 2, Scalar(255, 0, 0), 3);
+	}
+	break;
+	}
 }
