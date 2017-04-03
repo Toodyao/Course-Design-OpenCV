@@ -199,22 +199,26 @@ const int ItemNumber = 10;//屏幕上物品的总数
 
 IMAGE background, lost, cake, umbrella, bomb_a, bomb_b, imgplayer;
 Mat allBackground(600, 800, CV_8UC3, Scalar(0, 0, 0)), startBackground, startBackgroundBackUp, start_b_h, start_b_n, help_b_h, help_b_n, mode_b_h, mode_b_n, settings_b_h, settings_b_n, rank_b_h, rank_b_n, exit_b_h, exit_b_n;
+Mat player_t, umbrella_t, bomb_t, cake_t;
 String windowName("测试");
 
 int main()
 {
 	windowInit();
 	loadAllImages();
-	//imshow(windowName, allBackground);
-	//overlayImage(&allBackground, &startBackground, Point(0, 0));
+	
 	imshow(windowName, startBackground);
-	Menu();
+
+	//overlayImage(&startBackground, &player_t, Point(100, 100));
+	
+	//imshow(windowName, startBackground);
+	//waitKey(0);
 	setMouseCallback(windowName, on_mouse, &startBackground);
-	while (1)
-	{
-		imshow(windowName, startBackground);
-		waitKey(33);
-	}
+	Menu();
+	
+
+
+
 	//Move();
 	return 0;
 	//line(allBackground, Point(0, BORDER), Point(WIDTH, BORDER), Scalar(255, 255, 255));
@@ -246,28 +250,27 @@ void gameFramwork(struct Settings settings)
 	// TODO 应该先数据再界面
 	//界面初始化
 	//setbkmode(TRANSPARENT);//设置文字背景透明
-	line(allBackground, Point(0, BORDER), Point(WIDTH, BORDER), Scalar(255, 255, 255));
+	line(startBackground, Point(0, BORDER), Point(WIDTH, BORDER), Scalar(255, 255, 255));
 	//开始按钮
-	Rect start ( 30, BORDER + 40, 70, 80 );
-	rectangle(allBackground,Point(30, BORDER + 40), Point(100, BORDER + 80), Scalar(255, 0, 0));
-	putText(allBackground, String("暂停"), Point(30, 70), CV_FONT_HERSHEY_COMPLEX, 1, Scalar(255, 255, 0));
-	//drawtext(_T("暂停"), &start, DT_CENTER | DT_SINGLELINE | DT_VCENTER);
+	Rect start(30, BORDER + 40, 70, 40);
+	rectangle(startBackground, Point(30, BORDER + 40), Point(100, BORDER + 80), Scalar(255, 255, 255));
+	putText(startBackground, String("Pause"), Point(30, BORDER + 40 + 40), CV_FONT_HERSHEY_PLAIN, 1, Scalar(255, 255, 255));
 	//结束按钮
-	RECT end = { 150, BORDER + 40, 220, BORDER + 80 };
-	rectangle(150, BORDER + 40, 220, BORDER + 80);
-	drawtext(_T("主菜单"), &end, DT_CENTER | DT_SINGLELINE | DT_VCENTER);
+	Rect end(150, BORDER + 40, 70, 40);
+	rectangle(startBackground, Point(150, BORDER + 40), Point(150 + 70, BORDER + 80), Scalar(255, 255, 255));
+	putText(startBackground, String("Menu"), Point(150, BORDER + 80), CV_FONT_HERSHEY_PLAIN, 1, Scalar(255, 255, 255));
 	//分数
 	//玩家1
-	RECT scoreTextAera = { WIDTH - 300, BORDER + 40 - 20, WIDTH - 230, BORDER + 80 - 20 };
-	RECT playerNameAera = { WIDTH - 300, BORDER + 80 - 20, WIDTH - 230, BORDER + 120 - 20 };
-	rectangle(WIDTH - 300, BORDER + 40 - 20, WIDTH - 180, BORDER + 80 - 20);
-	rectangle(WIDTH - 300, BORDER + 80 - 20, WIDTH - 180, BORDER + 120 - 20);
+	Rect scoreTextAera(WIDTH - 300, BORDER + 40 - 20, 70, 20);
+	Rect playerNameAera(WIDTH - 300, BORDER + 80 - 20, 70, 20);
+	rectangle(startBackground, Point(WIDTH - 300, BORDER + 40 - 20), Point(WIDTH - 180, BORDER + 80 - 20), Scalar(255, 255, 255));
+	rectangle(startBackground, Point(WIDTH - 300, BORDER + 80 - 20), Point(WIDTH - 180, BORDER + 120 - 20), Scalar(255, 255, 255));
 
-	drawtext(_T("分数："), &scoreTextAera, DT_CENTER | DT_SINGLELINE | DT_VCENTER);
-	drawtext(_T("玩家1： "), &playerNameAera, DT_CENTER | DT_SINGLELINE | DT_VCENTER);
+	putText(startBackground, String("Score:"), Point(WIDTH - 300, BORDER + 80 - 20), CV_FONT_HERSHEY_PLAIN, 1, Scalar(255, 255, 255));
+	putText(startBackground, String("Player1:"), Point(WIDTH - 300, BORDER + 120 - 20), CV_FONT_HERSHEY_PLAIN, 1, Scalar(255, 255, 255));
 
 	//玩家2
-	if (settings.mode == 2)
+	/*if (settings.mode == 2)
 	{
 		RECT scoreTextAera2 = { WIDTH - 180, BORDER + 40 - 20, WIDTH - 110, BORDER + 80 - 20 };
 		RECT playerNameAera2 = { WIDTH - 180, BORDER + 80 - 20, WIDTH - 110, BORDER + 120 - 20 };
@@ -276,7 +279,7 @@ void gameFramwork(struct Settings settings)
 
 		drawtext(_T("分数："), &scoreTextAera2, DT_CENTER | DT_SINGLELINE | DT_VCENTER);
 		drawtext(_T("玩家2： "), &playerNameAera2, DT_CENTER | DT_SINGLELINE | DT_VCENTER);
-	}
+	}*/
 }
 
 void initPlayer(struct PLAYER *player1, struct PLAYER *player2)
@@ -320,6 +323,10 @@ void loadAllImages()
 	rank_b_n = imread("img\\buttons\\rank_n.png", CV_LOAD_IMAGE_UNCHANGED);
 	exit_b_h = imread("img\\buttons\\exit_h.png", CV_LOAD_IMAGE_UNCHANGED);
 	exit_b_n = imread("img\\buttons\\exit_n.png", CV_LOAD_IMAGE_UNCHANGED);
+	player_t = imread("img\\main\\player.png", CV_LOAD_IMAGE_UNCHANGED);
+	umbrella_t = imread("img\\main\\umbrella.png", CV_LOAD_IMAGE_UNCHANGED);
+	bomb_t = imread("img\\main\\bomb.png", CV_LOAD_IMAGE_UNCHANGED);
+	cake_t = imread("img\\main\\cake.png", CV_LOAD_IMAGE_UNCHANGED);
 	/*loadimage(&background, _T("MyImage"), MAKEINTRESOURCE(4));
 	loadimage(&cake, _T("img\\cake.jpg"), 40, 40);
 	loadimage(&umbrella, _T("img\\umbrella.gif"), 40, 40);
@@ -425,16 +432,19 @@ void drawItem(struct ITEM *item)
 	switch (item->type)
 	{
 	case UMBRELLA:
-		putimage((int)item->x - 20, (int)item->y - 20, &umbrella);
-		setlinecolor(WHITE);
+		overlayImage(&startBackground, &umbrella_t, Point((int)item->x - 20, (int)item->y - 20));
+		//putimage((int)item->x - 20, (int)item->y - 20, &umbrella);
+		//setlinecolor(WHITE);
 		break;
 	case CAKE:
-		putimage((int)item->x - 20, (int)item->y - 20, &cake);
-		setlinecolor(GREEN);
+		overlayImage(&startBackground, &cake_t, Point((int)item->x - 20, (int)item->y - 20));
+		//putimage((int)item->x - 20, (int)item->y - 20, &cake);
+		//setlinecolor(GREEN);
 		break;
 	case BOMB:
-		putimage((int)item->x - 20, (int)item->y - 20, &bomb_a);
-		setlinecolor(RED);
+		overlayImage(&startBackground, &bomb_t, Point((int)item->x - 20, (int)item->y - 20));
+		//putimage((int)item->x - 20, (int)item->y - 20, &bomb_a);
+		//setlinecolor(RED);
 
 		break;
 	}
@@ -467,10 +477,11 @@ void drawPlayer(struct PLAYER *player, int direction)
 	case LEFT: flag = -1; break;
 	case RIGHT: flag = 1; break;
 	}*/
-	setlinecolor(WHITE);
+	//setlinecolor(WHITE);
 	//circle((int)player->x, (int)player->y, 20);
 	//putimage((int)player->x - 20, (int)player->y - 20, &player);
-	putimage((int)player->x - 20, (int)player->y - 20, &imgplayer);
+	overlayImage(&startBackground, &player_t, Point((int)player->x - 20, (int)player->y - 20));
+	//putimage((int)player->x - 20, (int)player->y - 20, &imgplayer);
 }
 
 void drawPlayer2(struct PLAYER *player, int direction)
@@ -607,9 +618,7 @@ void Menu()
 		RECT exit = { 350, 360, 350 + 100, 360 + 50 };
 		overlayImage(&startBackground, &exit_b_n, Point(250, 120 + 70 + 70 + 70 + 70));
 		imshow(windowName, startBackground);
-		
-		cvWaitKey(33);
-		break;
+		waitKey(33);
 		//setfillcolor(CYAN);
 		////FlushBatchDraw();
 		//EndBatchDraw();
@@ -734,12 +743,13 @@ void Exit()
 
 void drawBackground()
 {
-	putimage(0, 0, &background);
+	startBackground = imread("img\\bkg.png", CV_LOAD_IMAGE_UNCHANGED); //将startBackground重置为背景图，相当于画了一遍背景，因为不知道overlayImage()效率如何
+	imshow(windowName, startBackground);
 }
 
 void gameStart()
 {
-	cleardevice();
+	//cleardevice();
 	// 数据初始化
 	srand((unsigned int)time(0));
 
@@ -755,7 +765,7 @@ void gameStart()
 	initItemToZero();
 
 
-	switch (settings.mode)
+	/*switch (settings.mode)
 	{
 	case 1:	InputBox((LPTSTR)&(player1->name), 10, (LPCTSTR)"请输入名字："); break;
 	case 2: {
@@ -764,14 +774,14 @@ void gameStart()
 	}
 			break;
 	case 3:	player1->name[0] = 'A'; player1->name[1] = 'I'; player1->name[2] = '\0'; break;
-	}
+	}*/
 
 	while (1)
 	{
 		for (int i = ItemNumber - ItemCount; i > 0; i--)
 			addItem();
 
-		BeginBatchDraw();
+		//BeginBatchDraw();
 
 		//画背景和框架
 		drawBackground();
@@ -794,12 +804,12 @@ void gameStart()
 		item = get_first_item();
 		while (item != NULL)
 		{
-			if (Pause(player1, player2) || returnToMenu())
-				return;
+			/*if (Pause(player1, player2) || returnToMenu())
+				return;*/
 
 			judgeState(item, player1);
 			if (settings.mode != 3)
-				judgeOver(player1, player2);
+				//judgeOver(player1, player2);
 			if (settings.mode == 2)
 				judgeState(item, player2);
 			//储存item里临时的数据，因为删除之后就无法读取item，无法在图形上删除item了
@@ -808,7 +818,8 @@ void gameStart()
 			enum TYPE temp_type = item->type;
 
 			if (delItem())
-				coverItem(temp_x, temp_y, temp_type);
+			{ }
+				//coverItem(temp_x, temp_y, temp_type);
 			else {
 				itemMove(item);
 				//AI移动
@@ -823,10 +834,11 @@ void gameStart()
 
 			item = get_next_item();
 		}
-		drawPlayerName(player1, player2);
-		drawScore(player1->score, player2->score);
-
-		EndBatchDraw();
+		//drawPlayerName(player1, player2);
+		//drawScore(player1->score, player2->score);
+		imshow(windowName, startBackground);
+		waitKey(1);
+		//EndBatchDraw();
 	}
 }
 
@@ -1127,9 +1139,14 @@ void on_mouse(int EVENT, int x, int y, int flags, void* userdata)
 	case EVENT_LBUTTONDOWN:
 	{
 		if (x >= 350 && x <= 350 + 100 && y >= 120 && y <= 120 + 50)
+		{
 			circle(hh, p, 2, Scalar(0, 0, 255), 3);
-		//if (x >= b_seat2.x && x <= b_seat2.x + b_seat2.width && y >= b_seat2.y && y <= b_seat2.y + b_seat2.height)
-			//circle(hh, p, 2, Scalar(255, 0, 0), 3);
+			gameStart();
+			
+		}
+			
+		if (x >= 350 && x <= 350 + 100 && y >= 180 && y <= 180 + 50)
+			circle(hh, p, 2, Scalar(255, 0, 0), 3);
 	}
 	break;
 	}
