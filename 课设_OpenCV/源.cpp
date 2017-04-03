@@ -83,6 +83,26 @@ void playerBubbleSort(struct PLAYER a[], int len);
 void Save(struct PLAYER *player);
 void showScore();
 
+//void on_mouse(int EVENT, int x, int y, int flags, void* userdata)
+//{
+//	Mat hh;
+//	hh = *(Mat*)userdata;
+//	Point p(x, y);
+//
+//	// 鼠标按下的响应事件 位置在按钮1上画红色圆点 按钮2上画蓝色圆点 根据需要自行更改
+//	switch (EVENT)
+//	{
+//	case EVENT_LBUTTONDOWN:
+//	{
+//		if (x >= b_seat1.x && x <= b_seat1.x + b_seat1.width && y >= b_seat1.y && y <= b_seat1.y + b_seat1.height)
+//			circle(hh, p, 2, Scalar(0, 0, 255), 3);
+//		if (x >= b_seat2.x && x <= b_seat2.x + b_seat2.width && y >= b_seat2.y && y <= b_seat2.y + b_seat2.height)
+//			circle(hh, p, 2, Scalar(255, 0, 0), 3);
+//	}
+//	break;
+//	}
+//}
+
 
 enum STATE { //物体的状态
 	ON_SCREEN, //在屏幕上
@@ -172,16 +192,59 @@ int ItemCount = 0;
 const int ItemNumber = 10;//屏幕上物品的总数
 
 IMAGE background, lost, cake, umbrella, bomb_a, bomb_b, imgplayer;
-Mat allBackground(600, 800, CV_8UC3, Scalar(255, 255, 255)), startBackground;
+Mat allBackground(600, 800, CV_8UC3, Scalar(0, 0, 0)), startBackground, start_b;
 String windowName("测试");
 
 int main()
 {
 	windowInit();
 	loadAllImages();
-	waitKey(0);
 	imshow(windowName, startBackground);
 	waitKey(0);
+	
+
+	double alpha = 0.5; double beta; double input;
+
+	Mat src1, src2, dst;
+
+	/// Ask the user enter alpha
+	std::cout << " Simple Linear Blender " << std::endl;
+	std::cout << "-----------------------" << std::endl;
+	std::cout << "* Enter alpha [0-1]: ";
+	std::cin >> input;
+
+	// We use the alpha provided by the user iff it is between 0 and 1
+	if (alpha >= 0 && alpha <= 1)
+	{
+		alpha = input;
+	}
+
+	/// Read image ( same size, same type )
+	src1 = imread("img\\bkg.jpg");
+	src2 = imread("img\\rank_h.png");
+
+	if (!src1.data) { printf("Error loading src1 \n"); return -1; }
+	if (!src2.data) { printf("Error loading src2 \n"); return -1; }
+
+	/// Create Windows
+	namedWindow("Linear Blend", 1);
+
+	beta = (1.0 - alpha);
+	addWeighted(src1, alpha, src2, beta, 0.0, dst);
+
+	imshow("Linear Blend", dst);
+
+
+	waitKey(0);
+	return 0;
+	//line(allBackground, Point(0, BORDER), Point(WIDTH, BORDER), Scalar(255, 255, 255));
+	////开始按钮
+	//Rect start(30, BORDER + 40, 70, 80);
+	//rectangle(allBackground, Point(30, BORDER + 40), Point(100, BORDER + 80), Scalar(255, 0, 0));
+	//putText(allBackground, String("Pause"), Point(30, BORDER + 80), FONT_HERSHEY_PLAIN, 1, Scalar(255, 255, 0));
+	//imshow(windowName, allBackground);
+	//waitKey(0);
+
 	//initgraph(WIDTH, HEIGHT, SHOWCONSOLE);
 	//loadAllImages();
 	//Menu();
@@ -203,11 +266,12 @@ void gameFramwork(struct Settings settings)
 	// TODO 应该先数据再界面
 	//界面初始化
 	//setbkmode(TRANSPARENT);//设置文字背景透明
-	line(0, BORDER, WIDTH, BORDER);
+	line(allBackground, Point(0, BORDER), Point(WIDTH, BORDER), Scalar(255, 255, 255));
 	//开始按钮
-	RECT start = { 30, BORDER + 40, 100, BORDER + 80 };
-	rectangle(30, BORDER + 40, 100, BORDER + 80);
-	drawtext(_T("暂停"), &start, DT_CENTER | DT_SINGLELINE | DT_VCENTER);
+	Rect start ( 30, BORDER + 40, 70, 80 );
+	rectangle(allBackground,Point(30, BORDER + 40), Point(100, BORDER + 80), Scalar(255, 0, 0));
+	putText(allBackground, String("暂停"), Point(30, 70), CV_FONT_HERSHEY_COMPLEX, 1, Scalar(255, 255, 0));
+	//drawtext(_T("暂停"), &start, DT_CENTER | DT_SINGLELINE | DT_VCENTER);
 	//结束按钮
 	RECT end = { 150, BORDER + 40, 220, BORDER + 80 };
 	rectangle(150, BORDER + 40, 220, BORDER + 80);
@@ -263,6 +327,7 @@ void initItemToZero()
 void loadAllImages()
 {
 	startBackground = imread("img\\bkg.jpg", IMREAD_COLOR);
+	start_b = imread("img\\rank_h.png", IMREAD_COLOR);
 	/*loadimage(&background, _T("MyImage"), MAKEINTRESOURCE(4));
 	loadimage(&cake, _T("img\\cake.jpg"), 40, 40);
 	loadimage(&umbrella, _T("img\\umbrella.gif"), 40, 40);
