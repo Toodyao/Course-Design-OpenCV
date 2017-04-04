@@ -51,7 +51,20 @@ void drawPlayer2(struct PLAYER *player, int direction);
 void drawScore(int score, int score2);
 void drawPlayerName(struct PLAYER *player, struct PLAYER *player2);
 void drawOver(struct PLAYER *player1, struct PLAYER *player2);
-void drawTransparent(IMAGE trans_a, IMAGE trans_b);
+void drawTransparent(Mat image, Mat logo, Mat mask, int x, int y);
+void drawTransparent(Mat image, Mat logo, int x, int y)
+{
+	Mat mask;
+	cvtColor(logo, mask, CV_BGR2GRAY);//转换为灰度图
+	threshold(mask, mask, 254, 255, CV_THRESH_BINARY);
+	Mat mask1 = 255 - mask; //掩模反色 
+
+	Mat imageROI;
+	imageROI = image(Rect(x, y, logo.cols, logo.rows));
+	
+	logo.copyTo(imageROI, mask1);
+	
+}
 //双人重载 不用重载
 //void drawPlayerName(struct PLAYER *player1, struct PLAYER *player2);
 // TODO 加地图移动
@@ -179,11 +192,18 @@ typedef struct ITEM {
 
 
 //全局变量
+//struct SPEED speed = {//初始化速度
+//	0.5,//player
+//	0.11,//cake
+//	0.14,//umbrella
+//	0.19//bomb
+//};
+
 struct SPEED speed = {//初始化速度
-	0.5,//player
-	0.11,//cake
-	0.14,//umbrella
-	0.19//bomb
+	5,//player
+	1,//cake
+	4,//umbrella
+	9//bomb
 };
 
 struct item_list item_list_head;
@@ -199,7 +219,7 @@ const int ItemNumber = 10;//屏幕上物品的总数
 
 IMAGE background, lost, cake, umbrella, bomb_a, bomb_b, imgplayer;
 Mat allBackground(600, 800, CV_8UC3, Scalar(0, 0, 0)), startBackground, startBackgroundBackUp, start_b_h, start_b_n, help_b_h, help_b_n, mode_b_h, mode_b_n, settings_b_h, settings_b_n, rank_b_h, rank_b_n, exit_b_h, exit_b_n;
-Mat player_t, umbrella_t, bomb_t, cake_t;
+Mat img_player, img_umbrella, img_bomb, img_cake, player_m, umbrella_m, bomb_m, cake_m;
 String windowName("测试");
 
 int main()
@@ -214,12 +234,14 @@ int main()
 	//imshow(windowName, startBackground);
 	//waitKey(0);
 	setMouseCallback(windowName, on_mouse, &startBackground);
-	Menu();
+	//Menu();
+	gameStart();
 	
+	/*drawTransparent(startBackground, img_cake, cake_m, 100, 100);
+	imshow(windowName, startBackground);
+*/
 
 
-
-	//Move();
 	return 0;
 	//line(allBackground, Point(0, BORDER), Point(WIDTH, BORDER), Scalar(255, 255, 255));
 	////开始按钮
@@ -302,31 +324,36 @@ void initItemToZero()
 	{
 		item->state = ON_SCREEN;
 		item->x = 200 + rand() % 400;
-		item->y = -(rand() % 550);
+		item->y = 0;
+		//item->y = -(rand() % 550);
 		item = get_next_item();
 	}
 }
 
 void loadAllImages()
 {
-	startBackground = imread("img\\bkg.png", CV_LOAD_IMAGE_UNCHANGED);
-	startBackgroundBackUp = imread("img\\bkg.png", CV_LOAD_IMAGE_UNCHANGED);
-	start_b_h = imread("img\\buttons\\start_h.png", CV_LOAD_IMAGE_UNCHANGED);
-	start_b_n = imread("img\\buttons\\start_n.png", CV_LOAD_IMAGE_UNCHANGED);
-	help_b_h = imread("img\\buttons\\help_h.png", CV_LOAD_IMAGE_UNCHANGED);
-	help_b_n = imread("img\\buttons\\help_n.png", CV_LOAD_IMAGE_UNCHANGED);
-	mode_b_h = imread("img\\buttons\\mode_h.png", CV_LOAD_IMAGE_UNCHANGED);
-	mode_b_n = imread("img\\buttons\\mode_n.png", CV_LOAD_IMAGE_UNCHANGED);
-	settings_b_h = imread("img\\buttons\\settings_h.png", CV_LOAD_IMAGE_UNCHANGED);
-	settings_b_n = imread("img\\buttons\\settings_n.png", CV_LOAD_IMAGE_UNCHANGED);
-	rank_b_h = imread("img\\buttons\\rank_h.png", CV_LOAD_IMAGE_UNCHANGED);
-	rank_b_n = imread("img\\buttons\\rank_n.png", CV_LOAD_IMAGE_UNCHANGED);
-	exit_b_h = imread("img\\buttons\\exit_h.png", CV_LOAD_IMAGE_UNCHANGED);
-	exit_b_n = imread("img\\buttons\\exit_n.png", CV_LOAD_IMAGE_UNCHANGED);
-	player_t = imread("img\\main\\player.png", CV_LOAD_IMAGE_UNCHANGED);
-	umbrella_t = imread("img\\main\\umbrella.png", CV_LOAD_IMAGE_UNCHANGED);
-	bomb_t = imread("img\\main\\bomb.png", CV_LOAD_IMAGE_UNCHANGED);
-	cake_t = imread("img\\main\\cake.png", CV_LOAD_IMAGE_UNCHANGED);
+	startBackground = imread("img\\bkg1.jpg");
+	startBackgroundBackUp = imread("img\\bkg.png");
+	start_b_h = imread("img\\buttons\\start_h.png");
+	start_b_n = imread("img\\buttons\\start_n.png");
+	help_b_h = imread("img\\buttons\\help_h.png");
+	help_b_n = imread("img\\buttons\\help_n.png");
+	mode_b_h = imread("img\\buttons\\mode_h.png");
+	mode_b_n = imread("img\\buttons\\mode_n.png");
+	settings_b_h = imread("img\\buttons\\settings_h.png");
+	settings_b_n = imread("img\\buttons\\settings_n.png");
+	rank_b_h = imread("img\\buttons\\rank_h.png");
+	rank_b_n = imread("img\\buttons\\rank_n.png");
+	exit_b_h = imread("img\\buttons\\exit_h.png");
+	exit_b_n = imread("img\\buttons\\exit_n.png");
+	img_player = imread("img\\main\\player.bmp");
+	img_umbrella = imread("img\\main\\umbrella.bmp");
+	img_bomb = imread("img\\main\\bomb.bmp");
+	img_cake = imread("img\\main\\cake.bmp");
+	player_m = imread("img\\main\\player_b.bmp");
+	umbrella_m = imread("img\\main\\umbrella_b.bmp");
+	bomb_m = imread("img\\main\\bomb_b.bmp");
+	cake_m = imread("img\\main\\cake_b.bmp");
 	/*loadimage(&background, _T("MyImage"), MAKEINTRESOURCE(4));
 	loadimage(&cake, _T("img\\cake.jpg"), 40, 40);
 	loadimage(&umbrella, _T("img\\umbrella.gif"), 40, 40);
@@ -360,7 +387,8 @@ void addItem()//把new和add函数合成一个函数了
 	////
 	newItem->state = ON_SCREEN;
 	newItem->x = 200 + rand() % 400;
-	newItem->y = -(rand() % 550);
+	newItem->y = 0;
+	//newItem->y = -(rand() % 550);
 	//	newItem->next = NULL;
 	//创建大节点
 	struct item_list *list_tail = &item_list_head;
@@ -432,20 +460,23 @@ void drawItem(struct ITEM *item)
 	switch (item->type)
 	{
 	case UMBRELLA:
-		overlayImage(&startBackground, &umbrella_t, Point((int)item->x - 20, (int)item->y - 20));
+		//TODO 取消了-20
+		drawTransparent(startBackground, img_umbrella, umbrella_m, (int)item->x, (int)item->y);
+		//overlayImage(&startBackground, &umbrella_t, Point((int)item->x - 20, (int)item->y - 20));
 		//putimage((int)item->x - 20, (int)item->y - 20, &umbrella);
 		//setlinecolor(WHITE);
 		break;
 	case CAKE:
-		overlayImage(&startBackground, &cake_t, Point((int)item->x - 20, (int)item->y - 20));
+		drawTransparent(startBackground, img_cake, cake_m, (int)item->x, (int)item->y);
+		//overlayImage(&startBackground, &cake_t, Point((int)item->x - 20, (int)item->y - 20));
 		//putimage((int)item->x - 20, (int)item->y - 20, &cake);
 		//setlinecolor(GREEN);
 		break;
 	case BOMB:
-		overlayImage(&startBackground, &bomb_t, Point((int)item->x - 20, (int)item->y - 20));
+		drawTransparent(startBackground, img_bomb, bomb_m, (int)item->x, (int)item->y);
+		//overlayImage(&startBackground, &bomb_t, Point((int)item->x - 20, (int)item->y - 20));
 		//putimage((int)item->x - 20, (int)item->y - 20, &bomb_a);
 		//setlinecolor(RED);
-
 		break;
 	}
 }
@@ -480,7 +511,8 @@ void drawPlayer(struct PLAYER *player, int direction)
 	//setlinecolor(WHITE);
 	//circle((int)player->x, (int)player->y, 20);
 	//putimage((int)player->x - 20, (int)player->y - 20, &player);
-	overlayImage(&startBackground, &player_t, Point((int)player->x - 20, (int)player->y - 20));
+	drawTransparent(startBackground, img_player, player_m, (int)player->x - 20, (int)player->y - 20);
+	//overlayImage(&startBackground, &player_t, Point((int)player->x - 20, (int)player->y - 20));
 	//putimage((int)player->x - 20, (int)player->y - 20, &imgplayer);
 }
 
@@ -564,13 +596,11 @@ void drawOver(struct PLAYER *player1, struct PLAYER *player2)
 	}
 }
 
-void drawTransparent(IMAGE trans_a, IMAGE trans_b)
+void drawTransparent(Mat image, Mat logo, Mat mask, int x, int y)
 {
-	SetWorkingImage(&trans_a);
-	putimage(0, 0, &trans_b, SRCINVERT);
-	SetWorkingImage(&background);
-	putimage(100, 100, &trans_b, SRCAND);
-	putimage(100, 100, &trans_a, SRCPAINT);
+	Mat imageROI;
+	imageROI = image(Rect(x, y, logo.cols, logo.rows));
+	logo.copyTo(imageROI, mask);
 }
 
 //界面函数
@@ -590,15 +620,18 @@ void Menu()
 		//setbkmode(TRANSPARENT);
 		//开始
 		Rect start(350, 120, 100, 50);
-		overlayImage(&startBackground, &start_b_n, Point(250, 120));
+		drawTransparent(startBackground, start_b_h, 250, 120);
+		//overlayImage(&startBackground, &start_b_n, Point(250, 120));
 		
 		//帮助
 		Rect help(350, 180, 100, 50);
-		overlayImage(&startBackground, &help_b_n, Point(250, 120 + 70));
+		drawTransparent(startBackground, help_b_h, 250, 120 + 70);
+		//overlayImage(&startBackground, &help_b_n, Point(250, 120 + 70));
 		
 		//设置/模式
 		RECT mode = { 350, 240, 350 + 100, 240 + 50 };
-		overlayImage(&startBackground, &mode_b_n, Point(250, 120 + 70 + 70));
+		drawTransparent(startBackground, mode_b_h, 250, 120 + 70 + 70);
+		//overlayImage(&startBackground, &mode_b_n, Point(250, 120 + 70 + 70));
 		//单人
 		//RECT singleplayer = { 460, 240, 460 + 100, 240 + 50 };
 		//overlayImage(&startBackground, &help_b_n, Point(250, 120));
@@ -613,10 +646,12 @@ void Menu()
 		drawtext(_T("AI"), &ai, DT_CENTER | DT_SINGLELINE | DT_VCENTER);*/
 		//排名
 		RECT rank = { 350, 300, 350 + 100, 300 + 50 };
-		overlayImage(&startBackground, &rank_b_n, Point(250, 120 + 70 + 70 + 70));
+		drawTransparent(startBackground, rank_b_h, 250, 120 + 70 + 70 + 70);
+		//overlayImage(&startBackground, &, Point(250, 120 + 70 + 70 + 70));
 		//退出
 		RECT exit = { 350, 360, 350 + 100, 360 + 50 };
-		overlayImage(&startBackground, &exit_b_n, Point(250, 120 + 70 + 70 + 70 + 70));
+		drawTransparent(startBackground, exit_b_h, 250, 120 + 70 + 70 + 70 + 70);
+		//overlayImage(&startBackground, &exit_b_n, Point(250, 120 + 70 + 70 + 70 + 70));
 		imshow(windowName, startBackground);
 		waitKey(33);
 		//setfillcolor(CYAN);
@@ -743,8 +778,8 @@ void Exit()
 
 void drawBackground()
 {
-	startBackground = imread("img\\bkg.png", CV_LOAD_IMAGE_UNCHANGED); //将startBackground重置为背景图，相当于画了一遍背景，因为不知道overlayImage()效率如何
-	imshow(windowName, startBackground);
+	startBackground = imread("img\\bkg1.jpg"); //将startBackground重置为背景图，相当于画了一遍背景，因为不知道overlayImage()效率如何
+	//imshow(windowName, startBackground);
 }
 
 void gameStart()
@@ -799,7 +834,7 @@ void gameStart()
 				drawPlayer2(player2, direction2);
 			}
 		}
-
+		
 		//物体动画
 		item = get_first_item();
 		while (item != NULL)
@@ -818,7 +853,9 @@ void gameStart()
 			enum TYPE temp_type = item->type;
 
 			if (delItem())
-			{ }
+			{
+			
+			}
 				//coverItem(temp_x, temp_y, temp_type);
 			else {
 				itemMove(item);
@@ -829,6 +866,7 @@ void gameStart()
 					drawPlayer(player1, direction);
 				}
 				drawItem(item);
+
 			}
 			//Sleep(1); //不用好像更流畅
 
@@ -837,7 +875,7 @@ void gameStart()
 		//drawPlayerName(player1, player2);
 		//drawScore(player1->score, player2->score);
 		imshow(windowName, startBackground);
-		waitKey(1);
+		waitKey(3);
 		//EndBatchDraw();
 	}
 }
@@ -845,13 +883,14 @@ void gameStart()
 //判断函数
 void judgeState(struct ITEM *item, struct PLAYER *player)
 {
-	if (item->y >= 480 - 20 - speed.umbrella)
+	//TODO 取消-20
+	if (item->y >= 480 - 70 - speed.umbrella)
 	{
 		item->state = OFF_SCREEN;
 		return;
 	}
 	int distance = (int)sqrt((player->x - item->x)*(player->x - item->x) + (player->y - item->y)*(player->y - item->y));
-	if (distance <= 40)
+	if (distance <= 80)
 	{
 		item->state = EATED;
 		if (item->type == CAKE)
@@ -939,15 +978,16 @@ void itemMove(struct ITEM *item)
 
 int playerMove(struct PLAYER *player)
 {
+//	char c = waitKey(1);
 	int key = 0;
-	if (GetAsyncKeyState(0x41))
+	if (/*c == 97*/GetAsyncKeyState(0x41))
 	{
 		player->x -= speed.player;
 		if (player->x <= 0 + speed.player || player->x >= WIDTH - speed.player) //边界检测
 			player->x += speed.player;
 		return LEFT;
 	}
-	if (GetAsyncKeyState(0x44))
+	if (/*c == 100*/GetAsyncKeyState(0x44))
 	{
 		player->x += speed.player;
 		if (player->x <= 0 + speed.player || player->x >= WIDTH - speed.player)
