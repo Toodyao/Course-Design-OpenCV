@@ -17,6 +17,7 @@ FILE* __cdecl __iob_func(unsigned i) {
 
 #include <highgui.h>
 #include <opencv2/opencv.hpp>
+
 using namespace cv;
 
 #define HEIGHT 600
@@ -27,12 +28,11 @@ using namespace cv;
 
 
 //初始化
-void windowInit(); //OpenCV
-void gameFramwork(struct Settings settings);
-//struct PLAYER *initPlayer();
+void windowInit(); //OpenCV改写
+void gameFramwork(struct Settings settings); //OpenCV改写
 void initPlayer(struct PLAYER *player1, struct PLAYER *player2);
 void initItemToZero();
-void loadAllImages();
+void loadAllImages(); //OpenCV改写
 //TODO 准备设置难度，利用重载
 //struct PLAYER *initPlayer();
 
@@ -43,7 +43,7 @@ int delItem();
 struct ITEM *get_first_item();
 struct ITEM *get_next_item();
 
-//画图函数
+//画图函数 //OpenCV改写
 void drawItem(struct ITEM *item);
 void coverItem(int x, int y, enum TYPE type);
 void drawPlayer(struct PLAYER *player, int direction);
@@ -52,24 +52,12 @@ void drawScore(int score, int score2);
 void drawPlayerName(struct PLAYER *player, struct PLAYER *player2);
 void drawOver(struct PLAYER *player1, struct PLAYER *player2);
 void drawTransparent(Mat image, Mat logo, Mat mask, int x, int y);
-void drawTransparent(Mat image, Mat logo, int x, int y)
-{
-	//Mat mask;
-	//cvtColor(logo, mask, CV_BGR2GRAY);//转换为灰度图
-	//threshold(mask, mask, 254, 255, CV_THRESH_BINARY);
-	//Mat mask1 = 255 - mask; //掩模反色 
-
-	Mat imageROI;
-	imageROI = image(Rect(x, y, logo.cols, logo.rows));
-	
-	logo.copyTo(imageROI, logo);
-	
-}
+void drawImage(Mat image, Mat logo, int x, int y);
 //双人重载 不用重载
 //void drawPlayerName(struct PLAYER *player1, struct PLAYER *player2);
 // TODO 加地图移动
 
-//界面函数
+//界面函数 //OpenCV改写
 void Menu();
 //void changeSettings();
 int Pause(struct PLAYER *player1, struct PLAYER *player2);
@@ -79,8 +67,6 @@ int returnToMenu();
 void Exit();
 void drawBackground();
 void gameStart();
-
-
 
 //判断函数
 void judgeState(struct ITEM *item, struct PLAYER *player);
@@ -96,31 +82,10 @@ void playerBubbleSort(struct PLAYER a[], int len);
 void Save(struct PLAYER *player);
 void showScore();
 
-//OpenCV
+//OpenCV 独有
 void overlayImage(Mat* src, Mat* overlay, const Point& location);
 void Move();
 void on_mouse(int EVENT, int x, int y, int flags, void* userdata);
-
-
-//void on_mouse(int EVENT, int x, int y, int flags, void* userdata)
-//{
-//	Mat hh;
-//	hh = *(Mat*)userdata;
-//	Point p(x, y);
-//
-//	// 鼠标按下的响应事件 位置在按钮1上画红色圆点 按钮2上画蓝色圆点 根据需要自行更改
-//	switch (EVENT)
-//	{
-//	case EVENT_LBUTTONDOWN:
-//	{
-//		if (x >= b_seat1.x && x <= b_seat1.x + b_seat1.width && y >= b_seat1.y && y <= b_seat1.y + b_seat1.height)
-//			circle(hh, p, 2, Scalar(0, 0, 255), 3);
-//		if (x >= b_seat2.x && x <= b_seat2.x + b_seat2.width && y >= b_seat2.y && y <= b_seat2.y + b_seat2.height)
-//			circle(hh, p, 2, Scalar(255, 0, 0), 3);
-//	}
-//	break;
-//	}
-//}
 
 
 enum STATE { //物体的状态
@@ -211,7 +176,7 @@ struct item_list *curr_list;
 
 struct Settings settings = { //默认设置
 	1,
-	3,
+	1,
 	120
 };
 int ItemCount = 0;
@@ -221,6 +186,7 @@ IMAGE background, lost, cake, umbrella, bomb_a, bomb_b, imgplayer;
 Mat allBackground(600, 800, CV_8UC3, Scalar(0, 0, 0)), startBackground(600, 800, CV_8UC3, Scalar(0, 0, 0)), startBackgroundBackUp, start_b_h, start_b_n, help_b_h, help_b_n, mode_b_h, mode_b_n, settings_b_h, settings_b_n, rank_b_h, rank_b_n, exit_b_h, exit_b_n;
 Mat img_player, img_umbrella, img_bomb, img_cake, player_m, umbrella_m, bomb_m, cake_m;
 String windowName("测试");
+Point p(0, 0);
 
 int main()
 {
@@ -228,31 +194,22 @@ int main()
 	loadAllImages();
 	
 	imshow(windowName, startBackground);
-	Point p(0, 0);
-	setMouseCallback(windowName, on_mouse, &p);
-	while (1)
-	{
-		Menu();
-		circle(startBackground, p, 10, Scalar(0, 255, 255), 3);
-		imshow(windowName, startBackground);
-		waitKey(1);
-
-	}
-	//gameStart();
 	
+	setMouseCallback(windowName, on_mouse, &p);
 
-
+	Menu();
+	
+	destroyAllWindows();
 	return 0;
-
-	//closegraph();
 }
 
 //初始化
 
 void windowInit()
 {
+	//初始化窗口并将分辨率设为指定大小
 	namedWindow(windowName, WINDOW_NORMAL);
-	resizeWindow(windowName, 800, 600);
+	resizeWindow(windowName, WIDTH, HEIGHT);
 	imshow(windowName, allBackground);
 }
 
@@ -281,16 +238,16 @@ void gameFramwork(struct Settings settings)
 	putText(startBackground, String("Player1:"), Point(WIDTH - 300, BORDER + 120 - 20), CV_FONT_HERSHEY_PLAIN, 1, Scalar(255, 255, 255));
 
 	//玩家2
-	/*if (settings.mode == 2)
+	if (settings.mode == 2)
 	{
-		RECT scoreTextAera2 = { WIDTH - 180, BORDER + 40 - 20, WIDTH - 110, BORDER + 80 - 20 };
-		RECT playerNameAera2 = { WIDTH - 180, BORDER + 80 - 20, WIDTH - 110, BORDER + 120 - 20 };
-		rectangle(WIDTH - 180, BORDER + 40 - 20, WIDTH - 60, BORDER + 80 - 20);
-		rectangle(WIDTH - 180, BORDER + 80 - 20, WIDTH - 60, BORDER + 120 - 20);
+		//RECT scoreTextAera2 = { WIDTH - 180, BORDER + 40 - 20, WIDTH - 110, BORDER + 80 - 20 };
+		//RECT playerNameAera2 = { WIDTH - 180, BORDER + 80 - 20, WIDTH - 110, BORDER + 120 - 20 };
+		rectangle(startBackground, Point(WIDTH - 180, BORDER + 40 - 20), Point(WIDTH - 60, BORDER + 80 - 20), Scalar(255, 255, 255));
+		rectangle(startBackground, Point(WIDTH - 180, BORDER + 80 - 20), Point(WIDTH - 60, BORDER + 120 - 20), Scalar(255, 255, 255));
 
-		drawtext(_T("分数："), &scoreTextAera2, DT_CENTER | DT_SINGLELINE | DT_VCENTER);
-		drawtext(_T("玩家2： "), &playerNameAera2, DT_CENTER | DT_SINGLELINE | DT_VCENTER);
-	}*/
+		putText(startBackground, String("Score:"), Point(WIDTH - 180, BORDER + 80 - 20), CV_FONT_HERSHEY_PLAIN, 1, Scalar(255, 255, 255));
+		putText(startBackground, String("Player2:"), Point(WIDTH - 180, BORDER + 120 - 20), CV_FONT_HERSHEY_PLAIN, 1, Scalar(255, 255, 255));
+	}
 }
 
 void initPlayer(struct PLAYER *player1, struct PLAYER *player2)
@@ -445,27 +402,22 @@ void drawItem(struct ITEM *item)
 	case UMBRELLA:
 		//TODO 取消了-20
 		drawTransparent(startBackground, img_umbrella, umbrella_m, (int)item->x, (int)item->y);
-		//overlayImage(&startBackground, &umbrella_t, Point((int)item->x - 20, (int)item->y - 20));
-		//putimage((int)item->x - 20, (int)item->y - 20, &umbrella);
-		//setlinecolor(WHITE);
+
 		break;
 	case CAKE:
 		drawTransparent(startBackground, img_cake, cake_m, (int)item->x, (int)item->y);
-		//overlayImage(&startBackground, &cake_t, Point((int)item->x - 20, (int)item->y - 20));
-		//putimage((int)item->x - 20, (int)item->y - 20, &cake);
-		//setlinecolor(GREEN);
+
 		break;
 	case BOMB:
 		drawTransparent(startBackground, img_bomb, bomb_m, (int)item->x, (int)item->y);
-		//overlayImage(&startBackground, &bomb_t, Point((int)item->x - 20, (int)item->y - 20));
-		//putimage((int)item->x - 20, (int)item->y - 20, &bomb_a);
-		//setlinecolor(RED);
+
 		break;
 	}
 }
 
 void coverItem(int x, int y, enum TYPE type)
 {
+	// TODO 待修改
 	switch (type)
 	{
 	case UMBRELLA:
@@ -485,32 +437,26 @@ void coverItem(int x, int y, enum TYPE type)
 
 void drawPlayer(struct PLAYER *player, int direction)
 {
+	// TODO 待修改
 	/*int flag = 0;
 	switch (direction)
 	{
 	case LEFT: flag = -1; break;
 	case RIGHT: flag = 1; break;
 	}*/
-	//setlinecolor(WHITE);
-	//circle((int)player->x, (int)player->y, 20);
-	//putimage((int)player->x - 20, (int)player->y - 20, &player);
 	drawTransparent(startBackground, img_player, player_m, (int)player->x - 20, (int)player->y - 20);
-	//overlayImage(&startBackground, &player_t, Point((int)player->x - 20, (int)player->y - 20));
-	//putimage((int)player->x - 20, (int)player->y - 20, &imgplayer);
 }
 
 void drawPlayer2(struct PLAYER *player, int direction)
 {
+	// TODO 待修改
 	/*int flag = 0;
 	switch (direction)
 	{
 	case LEFT: flag = -1; break;
 	case RIGHT: flag = 1; break;
 	}*/
-	//setlinecolor(BLACK);
-	//circle(player->x - (speed.player)*flag, player->y, 20);// 擦除前一个
-	setlinecolor(RED);
-	circle((int)player->x, (int)player->y, 20);
+	drawTransparent(startBackground, img_player, player_m, (int)player->x - 20, (int)player->y - 20);
 }
 
 void drawScore(int score, int score2)
@@ -586,11 +532,18 @@ void drawTransparent(Mat image, Mat logo, Mat mask, int x, int y)
 	logo.copyTo(imageROI, mask);
 }
 
+void drawImage(Mat image, Mat logo, int x, int y)
+{
+	Mat imageROI;
+	imageROI = image(Rect(x, y, logo.cols, logo.rows));
+	logo.copyTo(imageROI, logo);
+}
+
 //界面函数
 void Menu()
 {
-	//while (1)
-	//{
+	while (1)
+	{
 		
 		//TODO 需要
 		/*switch (settings.mode)
@@ -602,15 +555,15 @@ void Menu()
 		//开始
 		drawBackground();
 		Rect start(350, 120, 100, 50);
-		drawTransparent(startBackground, start_b_h, 250, 120);
+		drawImage(startBackground, start_b_h, 250, 120);
 		
 		//帮助
 		Rect help(350, 180, 100, 50);
-		drawTransparent(startBackground, help_b_h, 250, 120 + 70);
+		drawImage(startBackground, help_b_h, 250, 120 + 70);
 		
 		//设置/模式
 		RECT mode = { 350, 240, 350 + 100, 240 + 50 };
-		drawTransparent(startBackground, mode_b_h, 250, 120 + 70 + 70);
+		drawImage(startBackground, mode_b_h, 250, 120 + 70 + 70);
 
 		//单人
 		//RECT singleplayer = { 460, 240, 460 + 100, 240 + 50 };
@@ -626,10 +579,14 @@ void Menu()
 		drawtext(_T("AI"), &ai, DT_CENTER | DT_SINGLELINE | DT_VCENTER);*/
 		//排名
 		RECT rank = { 350, 300, 350 + 100, 300 + 50 };
-		drawTransparent(startBackground, rank_b_h, 250, 120 + 70 + 70 + 70);
+		drawImage(startBackground, rank_b_h, 250, 120 + 70 + 70 + 70);
 		//退出
 		RECT exit = { 350, 360, 350 + 100, 360 + 50 };
-		drawTransparent(startBackground, exit_b_h, 250, 120 + 70 + 70 + 70 + 70);
+		drawImage(startBackground, exit_b_h, 250, 120 + 70 + 70 + 70 + 70);
+
+		circle(startBackground, p, 10, Scalar(0, 255, 255), 3);
+		imshow(windowName, startBackground);
+		waitKey(1);
 
 		//imshow(windowName, startBackground);
 		//waitKey(33);
@@ -656,7 +613,7 @@ void Menu()
 
 		//case OFF:cleardevice(); break;
 		//}
-	//}
+	}
 
 	//EndBatchDraw();
 }
@@ -758,7 +715,7 @@ void Exit()
 void drawBackground()
 {
 	startBackground = (600, 800, CV_8UC3, Scalar(0, 0, 0)); //将startBackground重置为背景图，相当于画了一遍背景，因为不知道overlayImage()效率如何
-	drawTransparent(startBackground, startBackgroundBackUp, 0, 0);
+	drawImage(startBackground, startBackgroundBackUp, 0, 0);
 	//imshow(windowName, startBackground);
 }
 
@@ -1149,19 +1106,15 @@ void Move()
 
 void on_mouse(int EVENT, int x, int y, int flags, void* userdata)
 {
-	//Mat hh;
-	//hh = *(Mat*)userdata;
 	Point *p = (Point *)userdata;
-	p->x = 1;
-	//Point p(x, y);
-	//p = *(Point *)userdata;
 
 	// 鼠标按下的响应事件 位置在按钮1上画红色圆点 按钮2上画蓝色圆点 根据需要自行更改
 	if (350 <= x && x <= 350 + 100 && 120 <= y && y <= 120 + 50)
 	{
 		p->x = 350;
 		p->y = 120;
-		//gameStart();
+		if (EVENT == EVENT_LBUTTONDOWN)
+			gameStart();
 	}
 	else 
 	{
