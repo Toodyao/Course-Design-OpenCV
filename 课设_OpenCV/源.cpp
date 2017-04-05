@@ -211,7 +211,7 @@ struct item_list *curr_list;
 
 struct Settings settings = { //默认设置
 	1,
-	1,
+	3,
 	120
 };
 int ItemCount = 0;
@@ -228,10 +228,17 @@ int main()
 	loadAllImages();
 	
 	imshow(windowName, startBackground);
+	Point p(0, 0);
+	setMouseCallback(windowName, on_mouse, &p);
+	while (1)
+	{
+		Menu();
+		circle(startBackground, p, 10, Scalar(0, 255, 255), 3);
+		imshow(windowName, startBackground);
+		waitKey(1);
 
-	setMouseCallback(windowName, on_mouse, &startBackground);
-	//Menu();
-	gameStart();
+	}
+	//gameStart();
 	
 
 
@@ -582,8 +589,8 @@ void drawTransparent(Mat image, Mat logo, Mat mask, int x, int y)
 //界面函数
 void Menu()
 {
-	while (1)
-	{
+	//while (1)
+	//{
 		
 		//TODO 需要
 		/*switch (settings.mode)
@@ -592,22 +599,19 @@ void Menu()
 		case 2:fillrectangle(570, 240, 570 + 100, 240 + 50); break;
 		case 3:fillrectangle(680, 240, 680 + 100, 240 + 50); break;
 		}*/
-		//setlinecolor(WHITE);
-		//setbkmode(TRANSPARENT);
 		//开始
+		drawBackground();
 		Rect start(350, 120, 100, 50);
 		drawTransparent(startBackground, start_b_h, 250, 120);
-		//overlayImage(&startBackground, &start_b_n, Point(250, 120));
 		
 		//帮助
 		Rect help(350, 180, 100, 50);
 		drawTransparent(startBackground, help_b_h, 250, 120 + 70);
-		//overlayImage(&startBackground, &help_b_n, Point(250, 120 + 70));
 		
 		//设置/模式
 		RECT mode = { 350, 240, 350 + 100, 240 + 50 };
 		drawTransparent(startBackground, mode_b_h, 250, 120 + 70 + 70);
-		//overlayImage(&startBackground, &mode_b_n, Point(250, 120 + 70 + 70));
+
 		//单人
 		//RECT singleplayer = { 460, 240, 460 + 100, 240 + 50 };
 		//overlayImage(&startBackground, &help_b_n, Point(250, 120));
@@ -623,13 +627,12 @@ void Menu()
 		//排名
 		RECT rank = { 350, 300, 350 + 100, 300 + 50 };
 		drawTransparent(startBackground, rank_b_h, 250, 120 + 70 + 70 + 70);
-		//overlayImage(&startBackground, &, Point(250, 120 + 70 + 70 + 70));
 		//退出
 		RECT exit = { 350, 360, 350 + 100, 360 + 50 };
 		drawTransparent(startBackground, exit_b_h, 250, 120 + 70 + 70 + 70 + 70);
-		//overlayImage(&startBackground, &exit_b_n, Point(250, 120 + 70 + 70 + 70 + 70));
-		imshow(windowName, startBackground);
-		waitKey(33);
+
+		//imshow(windowName, startBackground);
+		//waitKey(33);
 		//setfillcolor(CYAN);
 		////FlushBatchDraw();
 		//EndBatchDraw();
@@ -653,7 +656,7 @@ void Menu()
 
 		//case OFF:cleardevice(); break;
 		//}
-	}
+	//}
 
 	//EndBatchDraw();
 }
@@ -1146,12 +1149,27 @@ void Move()
 
 void on_mouse(int EVENT, int x, int y, int flags, void* userdata)
 {
-	Mat hh;
-	hh = *(Mat*)userdata;
-	Point p(x, y);
+	//Mat hh;
+	//hh = *(Mat*)userdata;
+	Point *p = (Point *)userdata;
+	p->x = 1;
+	//Point p(x, y);
+	//p = *(Point *)userdata;
 
 	// 鼠标按下的响应事件 位置在按钮1上画红色圆点 按钮2上画蓝色圆点 根据需要自行更改
-	switch (EVENT)
+	if (350 <= x && x <= 350 + 100 && 120 <= y && y <= 120 + 50)
+	{
+		p->x = 350;
+		p->y = 120;
+		//gameStart();
+	}
+	else 
+	{
+		p->x = 0;
+		p->y = 0;
+	}
+	
+	/*switch (EVENT)
 	{
 	case EVENT_LBUTTONDOWN:
 	{
@@ -1166,5 +1184,5 @@ void on_mouse(int EVENT, int x, int y, int flags, void* userdata)
 			circle(hh, p, 2, Scalar(255, 0, 0), 3);
 	}
 	break;
-	}
+	}*/
 }
