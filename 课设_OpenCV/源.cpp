@@ -60,10 +60,10 @@ void drawImage(Mat image, Mat logo, int x, int y);
 //界面函数 //OpenCV改写
 void Menu();
 //void changeSettings();
-int Pause(struct PLAYER *player1, struct PLAYER *player2);
+int Pause(struct PLAYER *player1, struct PLAYER *player2, int *clickFlag);
 //void Help();
 //void Rank();
-int returnToMenu();
+int returnToMenu(int *clickFlag);
 void Exit();
 void drawBackground();
 void gameStart();
@@ -85,9 +85,8 @@ void showScore();
 //OpenCV 独有
 void overlayImage(Mat* src, Mat* overlay, const Point& location);
 void Move();
-void menuOnMouse(int EVENT, int x, int y, int flags, void* userdata);
-void void gameOnMouse(int EVENT, int x, int y, int flags, void *userdata)
-(int EVENT, int x, int y, int flags, void* userdata);
+static void menuOnMouse(int EVENT, int x, int y, int flags, void *userdata);
+static void gameOnMouse(int EVENT, int x, int y, int flags, void *userdata);
 
 enum STATE { //物体的状态
 	ON_SCREEN, //在屏幕上
@@ -539,7 +538,6 @@ void drawImage(Mat image, Mat logo, int x, int y)
 void Menu()
 {
 	Point p(0, 0);
-	setMouseCallback(windowName, menuOnMouse, &p);
 	while (1)
 	{
 		drawBackground();
@@ -583,6 +581,8 @@ void Menu()
 		drawImage(startBackground, exit_b_h, 250, 120 + 70 + 70 + 70 + 70);
 
 		circle(startBackground, p, 10, Scalar(0, 255, 255), 3);
+
+		setMouseCallback(windowName, menuOnMouse, &p);
 		imshow(windowName, startBackground);
 		waitKey(1);
 
@@ -616,91 +616,23 @@ void Menu()
 	//EndBatchDraw();
 }
 
-int Pause(struct PLAYER *player1, struct PLAYER *player2)
+int Pause(struct PLAYER *player1, struct PLAYER *player2, int *clickFlag)
 {
-	int flag = 0;
-	MOUSEMSG mouse;
-	//(30 <= mouse.x && mouse.x <= 100) && ((BORDER + 40) <= mouse.y && mouse.y <= (BORDER + 80)) && 
-	if (MouseHit())
+	while (*clickFlag)
 	{
-		mouse = GetMouseMsg();
-		if ((30 <= mouse.x && mouse.x <= 100) && ((BORDER + 40) <= mouse.y && mouse.y <= (BORDER + 80)) && mouse.uMsg == WM_LBUTTONDOWN)
-			while (1)
-			{
-				clearrectangle(30, BORDER + 40, 100, BORDER + 80);
-				RECT start = { 30, BORDER + 40, 100, BORDER + 80 };
-				rectangle(30, BORDER + 40, 100, BORDER + 80);
-				drawtext(_T("继续"), &start, DT_CENTER | DT_SINGLELINE | DT_VCENTER);
-				drawPlayerName(player1, player2);
-				drawScore(player1->score, player2->score);
-				FlushBatchDraw();
-				if (MouseHit())
-				{
-					mouse = GetMouseMsg();
-					if ((30 <= mouse.x && mouse.x <= 100) && ((BORDER + 40) <= mouse.y && mouse.y <= (BORDER + 80)) && mouse.uMsg == WM_LBUTTONDOWN)
-						break;
-				}
-				else
-					mouse.uMsg = NULL;
-				if (GetAsyncKeyState(0x50))
-					break;
-				if (returnToMenu())
-				{
-					flag = 1;
-					break;
-				}
-
-			}
+		drawBackground();
+		gameFramwork(settings);
+		putText(startBackground, String("Continue"), Point(30, BORDER + 40 + 40), CV_FONT_HERSHEY_PLAIN, 1, Scalar(255, 255, 255));
+		imshow(windowName, startBackground);
+		waitKey(33);
 	}
-	else
-		mouse.uMsg = NULL;
-
-	if (GetAsyncKeyState(0x50))
-	{
-		while (1)
-		{
-			clearrectangle(30, BORDER + 40, 100, BORDER + 80);
-			RECT start = { 30, BORDER + 40, 100, BORDER + 80 };
-			rectangle(30, BORDER + 40, 100, BORDER + 80);
-			drawtext(_T("开始"), &start, DT_CENTER | DT_SINGLELINE | DT_VCENTER);
-			drawPlayerName(player1, player2);
-			drawScore(player1->score, player2->score);
-			FlushBatchDraw();
-			if (MouseHit())
-			{
-				mouse = GetMouseMsg();
-				if ((30 <= mouse.x && mouse.x <= 100) && ((BORDER + 40) <= mouse.y && mouse.y <= (BORDER + 80)) && mouse.uMsg == WM_LBUTTONDOWN)
-					break;
-			}
-			else
-				mouse.uMsg = NULL;
-			if (GetAsyncKeyState(0x50))
-				break;
-			if (returnToMenu())
-			{
-				flag = 1;
-				break;
-			}
-
-		}
-	}
-
-	return flag;
+	
+	return 0;
 }
 
-int returnToMenu()
+int returnToMenu(int *clickFlag)
 {
-	MOUSEMSG mouse;
-	mouse.uMsg = NULL;
-	if (MouseHit())
-	{
-		mouse = GetMouseMsg();
-		if ((150 <= mouse.x && mouse.x <= 220) && ((BORDER + 40) <= mouse.y && mouse.y <= (BORDER + 80)) && mouse.uMsg == WM_LBUTTONDOWN)
-			return 1;
-	}
-	else
-		mouse.uMsg = NULL;
-	if (GetAsyncKeyState(0x1B))
+	if (*clickFlag == 2)
 		return 1;
 	return 0;
 }
@@ -745,7 +677,8 @@ void gameStart()
 			break;
 	case 3:	player1->name[0] = 'A'; player1->name[1] = 'I'; player1->name[2] = '\0'; break;
 	}*/
-
+	int clickFlag = 0;
+	setMouseCallback(windowName, gameOnMouse, &clickFlag);
 	while (1)
 	{
 		for (int i = ItemNumber - ItemCount; i > 0; i--)
@@ -776,6 +709,9 @@ void gameStart()
 		{
 			/*if (Pause(player1, player2) || returnToMenu())
 				return;*/
+			
+			if (returnToMenu(&clickFlag) || Pause(player1, player2, &clickFlag))
+				return;
 
 			judgeState(item, player1);
 			if (settings.mode != 3)
@@ -1102,7 +1038,7 @@ void Move()
 	}
 }
 
-void menuOnMouse(int EVENT, int x, int y, int flags, void* userdata)
+static void menuOnMouse(int EVENT, int x, int y, int flags, void *userdata)
 {
 	Point *p = (Point *)userdata;
 
@@ -1142,8 +1078,21 @@ void menuOnMouse(int EVENT, int x, int y, int flags, void* userdata)
 	}*/
 }
 
-void gameOnMouse(int EVENT, int x, int y, int flags, void *userdata)
+static void gameOnMouse(int EVENT, int x, int y, int flags, void *userdata)
 {
-	Point *p = (Point *)userdata;
+	int pauseFlag = 0;
+	int *clickFlag = (int *)userdata;
 
+	//暂停
+	if (30 <= x && x <= 100 && (BORDER + 40) <= y && y <= (BORDER + 80) && EVENT == EVENT_LBUTTONDOWN)
+		*clickFlag = !*clickFlag;
+
+	//开始
+	if ((150 <= x && x <= 220) && ((BORDER + 40) <= y && y <= (BORDER + 80)) && EVENT == EVENT_LBUTTONDOWN)
+	{
+		*clickFlag = 2;
+		/**clickFlag = pauseFlag ? 3 : 4;
+		pauseFlag = !pauseFlag;*/
+	}
+		
 }
