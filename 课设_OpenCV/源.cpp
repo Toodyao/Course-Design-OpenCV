@@ -85,8 +85,9 @@ void showScore();
 //OpenCV 独有
 void overlayImage(Mat* src, Mat* overlay, const Point& location);
 void Move();
-void on_mouse(int EVENT, int x, int y, int flags, void* userdata);
-
+void menuOnMouse(int EVENT, int x, int y, int flags, void* userdata);
+void void gameOnMouse(int EVENT, int x, int y, int flags, void *userdata)
+(int EVENT, int x, int y, int flags, void* userdata);
 
 enum STATE { //物体的状态
 	ON_SCREEN, //在屏幕上
@@ -185,8 +186,7 @@ const int ItemNumber = 5;//屏幕上物品的总数
 IMAGE background, lost, cake, umbrella, bomb_a, bomb_b, imgplayer;
 Mat allBackground(600, 800, CV_8UC3, Scalar(0, 0, 0)), startBackground(600, 800, CV_8UC3, Scalar(0, 0, 0)), startBackgroundBackUp, start_b_h, start_b_n, help_b_h, help_b_n, mode_b_h, mode_b_n, settings_b_h, settings_b_n, rank_b_h, rank_b_n, exit_b_h, exit_b_n;
 Mat img_player, img_umbrella, img_bomb, img_cake, player_m, umbrella_m, bomb_m, cake_m;
-String windowName("测试");
-Point p(0, 0);
+const String windowName("测试");
 
 int main()
 {
@@ -195,8 +195,6 @@ int main()
 	
 	imshow(windowName, startBackground);
 	
-	setMouseCallback(windowName, on_mouse, &p);
-
 	Menu();
 	
 	destroyAllWindows();
@@ -463,28 +461,26 @@ void drawScore(int score, int score2)
 {
 	char scoreNumber[10];
 	sprintf_s(scoreNumber, "%d", score);
-	setlinecolor(WHITE);
-	RECT scoreNumberAera = { WIDTH - 300, BORDER + 40 - 20, WIDTH - 150, BORDER + 80 - 20 };
-	drawtext((LPCTSTR)scoreNumber, &scoreNumberAera, (DT_CENTER | DT_SINGLELINE | DT_VCENTER));
-	//玩家2
+	putText(startBackground, scoreNumber, Point(WIDTH - 240, BORDER + 80 - 20), CV_FONT_HERSHEY_PLAIN, 1, Scalar(255, 255, 255));
+		//玩家2
 	if (settings.mode == 2)
 	{
 		char scoreNumber2[10];
 		sprintf_s(scoreNumber2, "%d", score2);
-		RECT scoreNumberAera2 = { WIDTH - 180, BORDER + 40 - 20, WIDTH - 30, BORDER + 80 - 20 };
-		drawtext((LPCTSTR)scoreNumber2, &scoreNumberAera2, (DT_CENTER | DT_SINGLELINE | DT_VCENTER));
+		putText(startBackground, scoreNumber2, Point(WIDTH - 120, BORDER + 80 - 20), CV_FONT_HERSHEY_PLAIN, 1, Scalar(255, 255, 255));
+		//RECT scoreNumberAera2 = { WIDTH - 180, BORDER + 40 - 20, WIDTH - 30, BORDER + 80 - 20 };
 	}
 }
 
 void drawPlayerName(struct PLAYER *player, struct PLAYER *player2)
 {
-	RECT playerNameAera = { WIDTH - 300, BORDER + 80 - 20, WIDTH - 150, BORDER + 120 - 20 };
-	drawtext((LPCTSTR)(player->name), &playerNameAera, DT_CENTER | DT_SINGLELINE | DT_VCENTER);
+	//RECT playerNameAera = { WIDTH - 300, BORDER + 80 - 20, WIDTH - 150, BORDER + 120 - 20 };
+	putText(startBackground, player->name, Point(WIDTH - 240, BORDER + 120 - 20), CV_FONT_HERSHEY_PLAIN, 1, Scalar(255, 255, 255));
 	//玩家2	
-	if (settings.mode == 2)
+	if (settings.mode == 1)
 	{
-		RECT playerNameAera2 = { WIDTH - 180, BORDER + 80 - 20, WIDTH - 30, BORDER + 120 - 20 };
-		drawtext((LPCTSTR)(player2->name), &playerNameAera2, DT_CENTER | DT_SINGLELINE | DT_VCENTER);
+		putText(startBackground, player->name, Point(WIDTH - 120, BORDER + 120 - 20), CV_FONT_HERSHEY_PLAIN, 1, Scalar(255, 255, 255));
+		//RECT playerNameAera2 = { WIDTH - 180, BORDER + 80 - 20, WIDTH - 30, BORDER + 120 - 20 };
 	}
 }
 
@@ -542,9 +538,11 @@ void drawImage(Mat image, Mat logo, int x, int y)
 //界面函数
 void Menu()
 {
+	Point p(0, 0);
+	setMouseCallback(windowName, menuOnMouse, &p);
 	while (1)
 	{
-		
+		drawBackground();
 		//TODO 需要
 		/*switch (settings.mode)
 		{
@@ -552,8 +550,8 @@ void Menu()
 		case 2:fillrectangle(570, 240, 570 + 100, 240 + 50); break;
 		case 3:fillrectangle(680, 240, 680 + 100, 240 + 50); break;
 		}*/
+
 		//开始
-		drawBackground();
 		Rect start(350, 120, 100, 50);
 		drawImage(startBackground, start_b_h, 250, 120);
 		
@@ -562,7 +560,7 @@ void Menu()
 		drawImage(startBackground, help_b_h, 250, 120 + 70);
 		
 		//设置/模式
-		RECT mode = { 350, 240, 350 + 100, 240 + 50 };
+		//RECT mode = { 350, 240, 350 + 100, 240 + 50 };
 		drawImage(startBackground, mode_b_h, 250, 120 + 70 + 70);
 
 		//单人
@@ -578,10 +576,10 @@ void Menu()
 		rectangle(680, 240, 680 + 100, 240 + 50);
 		drawtext(_T("AI"), &ai, DT_CENTER | DT_SINGLELINE | DT_VCENTER);*/
 		//排名
-		RECT rank = { 350, 300, 350 + 100, 300 + 50 };
+		//RECT rank = { 350, 300, 350 + 100, 300 + 50 };
 		drawImage(startBackground, rank_b_h, 250, 120 + 70 + 70 + 70);
 		//退出
-		RECT exit = { 350, 360, 350 + 100, 360 + 50 };
+		//RECT exit = { 350, 360, 350 + 100, 360 + 50 };
 		drawImage(startBackground, exit_b_h, 250, 120 + 70 + 70 + 70 + 70);
 
 		circle(startBackground, p, 10, Scalar(0, 255, 255), 3);
@@ -809,8 +807,8 @@ void gameStart()
 
 			item = get_next_item();
 		}
-		//drawPlayerName(player1, player2);
-		//drawScore(player1->score, player2->score);
+		drawPlayerName(player1, player2);
+		drawScore(player1->score, player2->score);
 		imshow(windowName, startBackground);
 		waitKey(1);
 		//EndBatchDraw();
@@ -1104,7 +1102,7 @@ void Move()
 	}
 }
 
-void on_mouse(int EVENT, int x, int y, int flags, void* userdata)
+void menuOnMouse(int EVENT, int x, int y, int flags, void* userdata)
 {
 	Point *p = (Point *)userdata;
 
@@ -1114,7 +1112,11 @@ void on_mouse(int EVENT, int x, int y, int flags, void* userdata)
 		p->x = 350;
 		p->y = 120;
 		if (EVENT == EVENT_LBUTTONDOWN)
+		{
+			setMouseCallback(windowName, NULL, NULL);
 			gameStart();
+		}
+			
 	}
 	else 
 	{
@@ -1138,4 +1140,10 @@ void on_mouse(int EVENT, int x, int y, int flags, void* userdata)
 	}
 	break;
 	}*/
+}
+
+void gameOnMouse(int EVENT, int x, int y, int flags, void *userdata)
+{
+	Point *p = (Point *)userdata;
+
 }
