@@ -154,12 +154,6 @@ typedef struct ITEM {
 
 
 //全局变量
-//struct SPEED speed = {//初始化速度
-//	0.5,//player
-//	0.11,//cake
-//	0.14,//umbrella
-//	0.19//bomb
-//};
 
 struct SPEED speed = {//初始化速度
 	5,//player
@@ -177,7 +171,7 @@ struct Settings settings = { //默认设置
 	120
 };
 int ItemCount = 0;
-const int ItemNumber = 5;//屏幕上物品的总数
+const int ItemNumber = 10;//屏幕上物品的总数
 
 Mat allBackground(600, 800, CV_8UC3, Scalar(0, 0, 0)), startBackground(600, 800, CV_8UC3, Scalar(0, 0, 0)), startBackgroundBackUp, overBackground(600, 800, CV_8UC3, Scalar(0, 0, 0)), start_b_h, start_b_n, help_b_h, help_b_n, mode_b_h, mode_b_n, settings_b_h, settings_b_n, rank_b_h, rank_b_n, exit_b_h, exit_b_n;
 Mat img_player, img_umbrella, img_bomb, img_cake, player_m, umbrella_m, bomb_m, cake_m;
@@ -527,13 +521,7 @@ void Menu()
 	{
 		drawBackground();
 		//TODO 需要
-		/*switch (settings.mode)
-		{
-		case 1:fillrectangle(460, 240, 460 + 100, 240 + 50); break;
-		case 2:fillrectangle(570, 240, 570 + 100, 240 + 50); break;
-		case 3:fillrectangle(680, 240, 680 + 100, 240 + 50); break;
-		}*/
-
+		
 		//开始
 		Rect start(350, 120, 100, 50);
 		drawImage(startBackground, start_b_h, 250, 120);
@@ -547,17 +535,20 @@ void Menu()
 		drawImage(startBackground, mode_b_h, 250, 120 + 70 + 70);
 
 		//单人
-		//RECT singleplayer = { 460, 240, 460 + 100, 240 + 50 };
-		//overlayImage(&startBackground, &help_b_n, Point(250, 120));
-
+		Rect singleplayer(460, 240, 100, 50);
+		rectangle(startBackground, singleplayer, Scalar(255, 255, 255));
+		putText(startBackground, String("Single"), Point(460, 240), CV_FONT_HERSHEY_PLAIN, 1, Scalar(255, 255, 255));
 		//双人
-		/*RECT multiplayer = { 570, 240, 570 + 100, 240 + 50 };
-		rectangle(570, 240, 570 + 100, 240 + 50);
-		drawtext(_T("双人"), &multiplayer, DT_CENTER | DT_SINGLELINE | DT_VCENTER);*/
+		Rect multiplayer(570, 240, 100, 50);
+		rectangle(startBackground, multiplayer, Scalar(255, 255, 255));
+		putText(startBackground, String("Multiplayer"), Point(570, 240), CV_FONT_HERSHEY_PLAIN, 1, Scalar(255, 255, 255));
+		//rectangle(570, 240, 570 + 100, 240 + 50);
+		//drawtext(_T("双人"), &multiplayer, DT_CENTER | DT_SINGLELINE | DT_VCENTER);
 		//AI
-		/*RECT ai = { 680, 240, 680 + 100, 240 + 50 };
-		rectangle(680, 240, 680 + 100, 240 + 50);
-		drawtext(_T("AI"), &ai, DT_CENTER | DT_SINGLELINE | DT_VCENTER);*/
+		Rect ai(680, 240, 100, 50);
+		rectangle(startBackground, ai, Scalar(255, 255, 255));
+		putText(startBackground, String("AI"), Point(680, 240), CV_FONT_HERSHEY_PLAIN, 1, Scalar(255, 255, 255));
+		//drawtext(_T("AI"), &ai, DT_CENTER | DT_SINGLELINE | DT_VCENTER);
 		//排名
 		//RECT rank = { 350, 300, 350 + 100, 300 + 50 };
 		drawImage(startBackground, rank_b_h, 250, 120 + 70 + 70 + 70);
@@ -566,36 +557,17 @@ void Menu()
 		drawImage(startBackground, exit_b_h, 250, 120 + 70 + 70 + 70 + 70);
 
 		circle(startBackground, p, 10, Scalar(0, 255, 255), 3);
+		switch (settings.mode)
+		{
+		case 1:circle(startBackground, Point(460, 240), 3, Scalar(255, 255, 0), 3); break;
+		case 2:circle(startBackground, Point(570, 240), 3, Scalar(255, 255, 0), 3);  break;
+		case 3:circle(startBackground, Point(680, 240), 3, Scalar(255, 255, 0), 3); break;
+		}
 
 		setMouseCallback(windowName, menuOnMouse, &p);
 		imshow(windowName, startBackground);
 		waitKey(1);
 
-		//imshow(windowName, startBackground);
-		//waitKey(33);
-		//setfillcolor(CYAN);
-		////FlushBatchDraw();
-		//EndBatchDraw();
-		//BeginBatchDraw();
-		//switch (judgeMouse())
-		//{
-		//case ON_START: fillrectangle(350, 120, 350 + 100, 120 + 50);  break;
-		//case HIT_START: gameStart(); break;
-		//case ON_HELP: fillrectangle(350, 180, 350 + 100, 180 + 50); break;
-		//	//case HIT_HELP: Help(); break;
-		//case ON_SINGLE: fillrectangle(460, 240, 460 + 100, 240 + 50); break;
-		//case HIT_SINGLE: settings.mode = 1; break;
-		//case ON_MULTI: fillrectangle(570, 240, 570 + 100, 240 + 50); break;
-		//case HIT_MULTI: settings.mode = 2; break;
-		//case ON_AI: fillrectangle(680, 240, 680 + 100, 240 + 50); break;
-		//case HIT_AI: settings.mode = 3; break;
-		//case ON_RANK: fillrectangle(350, 300, 350 + 100, 300 + 50); break;
-		//	//case HIT_RANK: Rank(); break;
-		//case ON_EXIT: fillrectangle(350, 360, 350 + 100, 360 + 50); break;
-		//case HIT_EXIT: Exit(); break;
-
-		//case OFF:cleardevice(); break;
-		//}
 	}
 
 	//EndBatchDraw();
@@ -624,6 +596,7 @@ int returnToMenu(int *clickFlag)
 
 void Exit()
 {
+	destroyAllWindows();
 	exit(0);
 }
 
@@ -716,17 +689,14 @@ void gameStart()
 					drawPlayer(player1, direction);
 				}
 				drawItem(item);
-
 			}
-			//Sleep(1); //不用好像更流畅
-
 			item = get_next_item();
 		}
 		drawPlayerName(player1, player2);
 		drawScore(player1->score, player2->score);
+
 		imshow(windowName, startBackground);
 		waitKey(1);
-		//EndBatchDraw();
 	}
 }
 
@@ -909,7 +879,7 @@ void showScore()
 		waitKey(33);
 		return;
 	}
-	// TODO 为什么读出了屯屯屯
+	
 	for (int i = 0; i < rankNumber; i++, lineCount++)
 	{
 		fread(&pplayer[i], sizeof(struct PLAYER), 1, fp);
@@ -975,8 +945,7 @@ static void menuOnMouse(int EVENT, int x, int y, int flags, void *userdata)
 {
 	Point *p = (Point *)userdata;
 
-	// 鼠标按下的响应事件 位置在按钮1上画红色圆点 按钮2上画蓝色圆点 根据需要自行更改
-	if (350 <= x && x <= 350 + 100 && 120 <= y && y <= 120 + 50)
+	if (350 <= x && x <= 350 + 100 && 120 <= y && y <= 120 + 50) //开始
 	{
 		p->x = 350;
 		p->y = 120;
@@ -986,7 +955,81 @@ static void menuOnMouse(int EVENT, int x, int y, int flags, void *userdata)
 			gameStart();
 		}
 	}
-	else 
+	else if (350 <= x && x <= 350 + 100 && 180 <= y && y <= 180 + 50) //帮助
+	{
+		p->x = 350;
+		p->y = 180;
+		if (EVENT == EVENT_LBUTTONDOWN)
+		{
+			/*setMouseCallback(windowName, NULL, NULL);
+			gameStart();*/
+		}
+	}
+	else if (350 <= x && x <= 350 + 100 && 240 <= y && y <= 240 + 50) //设置
+	{
+		p->x = 350;
+		p->y = 240;
+		if (EVENT == EVENT_LBUTTONDOWN)
+		{
+			/*setMouseCallback(windowName, NULL, NULL);
+			gameStart();*/
+		}
+	}
+	else if (460 <= x && x <= 460 + 100 && 240 <= y && y <= 240 + 50) //单人
+	{
+		p->x = 460;
+		p->y = 240;
+		if (EVENT == EVENT_LBUTTONDOWN)
+		{
+			settings.mode = 1;
+			/*setMouseCallback(windowName, NULL, NULL);
+			gameStart();*/
+		}
+	}
+	else if (570 <= x && x <= 570 + 100 && 240 <= y && y <= 240 + 50) //双人
+	{
+		p->x = 570;
+		p->y = 240;
+		if (EVENT == EVENT_LBUTTONDOWN)
+		{
+			settings.mode = 2;
+			/*setMouseCallback(windowName, NULL, NULL);
+			gameStart();*/
+		}
+	}
+	else if (680 <= x && x <= 680 + 100 && 240 <= y && y <= 240 + 50) //AI
+	{
+		p->x = 680;
+		p->y = 240;
+		if (EVENT == EVENT_LBUTTONDOWN)
+		{
+			settings.mode = 3;
+			circle(startBackground, Point(680, 240), 10, Scalar(255, 255, 255), 3);
+			/*setMouseCallback(windowName, NULL, NULL);
+			gameStart();*/
+		}
+	}
+	else if (350 <= x && x <= 350 + 100 && 300 <= y && y <= 300 + 50) //排名
+	{
+		p->x = 350;
+		p->y = 300;
+		if (EVENT == EVENT_LBUTTONDOWN)
+		{
+			setMouseCallback(windowName, NULL, NULL);
+			showScore();
+		}
+	}
+	else if (350 <= x && x <= 350 + 100 && 360 <= y && y <= 360 + 50) //排名
+	{
+		p->x = 350;
+		p->y = 360;
+		if (EVENT == EVENT_LBUTTONDOWN)
+		{
+			setMouseCallback(windowName, NULL, NULL);
+			Exit();
+		}
+	}
+	else
 	{
 		p->x = 0;
 		p->y = 0;
