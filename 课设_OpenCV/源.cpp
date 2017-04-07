@@ -1,23 +1,25 @@
 //解决台式机问题的代码
-#include "stdio.h"
+//#include "stdio.h"
 #ifdef __cplusplus 
 extern "C"
 #endif 
+/*
 FILE* __cdecl __iob_func(unsigned i) {
-	return __acrt_iob_func(i);
+return __acrt_iob_func(i);
 }
+*/
 
 //#include <graphics.h>
-#include <windows.h>
+//#include <windows.h>
 #include <stdlib.h>
 #include <stdio.h>
-#include <conio.h>
+//#include <conio.h>
 #include <math.h>
 #include <time.h>
 
 #include <highgui.h>
 #include <opencv2/opencv.hpp>
-
+#include "game_struct.h"
 using namespace cv;
 
 #define HEIGHT 600
@@ -33,10 +35,10 @@ void gameFramwork(struct Settings settings); //OpenCV改写
 void initPlayer(struct PLAYER *player1, struct PLAYER *player2);
 void initItemToZero();
 void loadAllImages(); //OpenCV改写
-//TODO 准备设置难度，利用重载
-//struct PLAYER *initPlayer();
+					  //TODO 准备设置难度，利用重载
+					  //struct PLAYER *initPlayer();
 
-//新的链表函数
+					  //新的链表函数
 void initItem();
 void addItem();
 int delItem();
@@ -84,92 +86,93 @@ void Move();
 static void menuOnMouse(int EVENT, int x, int y, int flags, void *userdata);
 static void gameOnMouse(int EVENT, int x, int y, int flags, void *userdata);
 static void overOnMouse(int EVENT, int x, int y, int flags, void *userdata);
-
+/*
 enum STATE { //物体的状态
-	ON_SCREEN, //在屏幕上
-	OFF_SCREEN, //离开了屏幕
-	EATED // 被玩家吃掉
+ON_SCREEN, //在屏幕上
+OFF_SCREEN, //离开了屏幕
+EATED // 被玩家吃掉
 };
 
 enum TYPE {
-	UMBRELLA,
-	CAKE,
-	BOMB
+UMBRELLA,
+CAKE,
+BOMB
 };
 
 enum MOUSE_POSITION {
-	NOTHING,
-	ON_START,
-	ON_HELP,
-	ON_SETTINGS,
-	ON_SINGLE,
-	ON_MULTI,
-	ON_AI,
-	ON_RANK,
-	ON_EXIT,
-	HIT_START,
-	HIT_HELP,
-	HIT_SETTINGS,
-	HIT_SINGLE,
-	HIT_MULTI,
-	HIT_AI,
-	HIT_RANK,
-	HIT_EXIT,
-	OFF
+NOTHING,
+ON_START,
+ON_HELP,
+ON_SETTINGS,
+ON_SINGLE,
+ON_MULTI,
+ON_AI,
+ON_RANK,
+ON_EXIT,
+HIT_START,
+HIT_HELP,
+HIT_SETTINGS,
+HIT_SINGLE,
+HIT_MULTI,
+HIT_AI,
+HIT_RANK,
+HIT_EXIT,
+OFF
 };
 
 struct SPEED { //TODO 填写速度,后期设置难度,可以改速度
-	double player;
-	double cake;
-	double umbrella;
-	double bomb;
+double player;
+double cake;
+double umbrella;
+double bomb;
 };
 
 struct PLAYER {
-	char name[10] = { '\0' }; //玩家名称
-	double x = 400;
-	double y = 480; //横坐标是一个确定的数
-	int score = 0; //玩家分数
-	int life = 1; //玩家的命
+char name[10] = { '\0' }; //玩家名称
+double x = 400;
+double y = 480; //横坐标是一个确定的数
+int score = 0; //玩家分数
+int life = 1; //玩家的命
 };
 
 struct Settings {
-	int difficult; //难度, 1简单，2中等，3困难
-	int mode; //模式 1为单人，2为双人，3为AI
-	int time; //游戏时间
+int difficult; //难度, 1简单，2中等，3困难
+int mode; //模式 1为单人，2为双人，3为AI
+int time; //游戏时间
 };
 //新的数据结构
 typedef struct item_list {
-	struct ITEM *this_item;
-	struct item_list *next;
+struct ITEM *this_item;
+struct item_list *next;
 }ItemList;
 
 typedef struct ITEM {
-	enum TYPE type; //具体是哪一种物品
-	enum STATE state;
-	double x;
-	double y;
-	//struct ITEM *next;
+enum TYPE type; //具体是哪一种物品
+enum STATE state;
+double x;
+double y;
+//struct ITEM *next;
 }Item;
 
 
 //全局变量
 
 struct SPEED speed = {//初始化速度
-	5,//player
-	1,//cake
-	4,//umbrella
-	3//bomb
+5,//player
+1,//cake
+4,//umbrella
+3//bomb
 };
 
 struct item_list item_list_head;
 struct item_list *curr_list;
 
 struct Settings settings = { //默认设置
-	1,
-	1,
-	120
+1,
+1,
+120
 };
+*/
 int ItemCount = 0;
 const int ItemNumber = 10;//屏幕上物品的总数
 
@@ -181,9 +184,9 @@ int main()
 {
 	windowInit();
 	loadAllImages();
-	
+
 	imshow(windowName, startBackground);
-	
+
 	Menu();
 
 	destroyAllWindows();
@@ -266,6 +269,7 @@ void initItemToZero()
 void loadAllImages()
 {
 	startBackground = (600, 800, CV_8UC3, Scalar(0, 0, 0));
+	/*
 	startBackgroundBackUp = imread("img\\bkg.png");
 	start_b_h = imread("img\\buttons\\start_h.png");
 	start_b_n = imread("img\\buttons\\start_n.png");
@@ -287,7 +291,29 @@ void loadAllImages()
 	umbrella_m = imread("img\\main\\umbrella_b.bmp");
 	bomb_m = imread("img\\main\\bomb_b.bmp");
 	cake_m = imread("img\\main\\cake_b.bmp");
-	
+	*/
+	startBackgroundBackUp = imread("img/bkg.png");
+	start_b_h = imread("img/buttons/start_h.png");
+	start_b_n = imread("img/buttons/start_n.png");
+	help_b_h = imread("img/buttons/help_h.png");
+	help_b_n = imread("img/buttons/help_n.png");
+	mode_b_h = imread("img/buttons/mode_h.png");
+	mode_b_n = imread("img/buttons/mode_n.png");
+	settings_b_h = imread("img/buttons/settings_h.png");
+	settings_b_n = imread("img/buttons/settings_n.png");
+	rank_b_h = imread("img/buttons/rank_h.png");
+	rank_b_n = imread("img/buttons/rank_n.png");
+	exit_b_h = imread("img/buttons/exit_h.png");
+	exit_b_n = imread("img/buttons/exit_n.png");
+	img_player = imread("img/main/player.bmp");
+	img_umbrella = imread("img/main/umbrella.bmp");
+	img_bomb = imread("img/main/bomb.bmp");
+	img_cake = imread("img/main/cake.bmp");
+	player_m = imread("img/main/player_b.bmp");
+	umbrella_m = imread("img/main/umbrella_b.bmp");
+	bomb_m = imread("img/main/bomb_b.bmp");
+	cake_m = imread("img/main/cake_b.bmp");
+
 }
 
 //新的链表函数
@@ -408,13 +434,13 @@ void coverItem(int x, int y, enum TYPE type)
 	switch (type)
 	{
 	case UMBRELLA:
-		
+
 		break;
 	case CAKE:
-		
+
 		break;
 	case BOMB:
-		
+
 		break;
 	}
 }
@@ -446,13 +472,13 @@ void drawPlayer2(struct PLAYER *player, int direction)
 void drawScore(int score, int score2)
 {
 	char scoreNumber[10];
-	sprintf_s(scoreNumber, "%d", score);
+	sprintf(scoreNumber, "%d", score);
 	putText(startBackground, scoreNumber, Point(WIDTH - 240, BORDER + 80 - 20), CV_FONT_HERSHEY_PLAIN, 1, Scalar(255, 255, 255));
-		//玩家2
+	//玩家2
 	if (settings.mode == 2)
 	{
 		char scoreNumber2[10];
-		sprintf_s(scoreNumber2, "%d", score2);
+		sprintf(scoreNumber2, "%d", score2);
 		putText(startBackground, scoreNumber2, Point(WIDTH - 120, BORDER + 80 - 20), CV_FONT_HERSHEY_PLAIN, 1, Scalar(255, 255, 255));
 		//RECT scoreNumberAera2 = { WIDTH - 180, BORDER + 40 - 20, WIDTH - 30, BORDER + 80 - 20 };
 	}
@@ -478,7 +504,7 @@ int drawOver(struct PLAYER *player1, struct PLAYER *player2)
 	while (1)
 	{
 		char score[20] = { '\0' };
-		sprintf_s(score, "Your score is: %d", player1->score);
+		sprintf(score, "Your score is: %d", player1->score);
 		putText(overBackground, String("Game Over"), Point(300, 300), CV_FONT_HERSHEY_PLAIN, 1, Scalar(255, 255, 255));
 		putText(overBackground, (String)score, Point(300, 320), CV_FONT_HERSHEY_PLAIN, 1, Scalar(255, 255, 255));
 
@@ -521,15 +547,15 @@ void Menu()
 	{
 		drawBackground();
 		//TODO 需要
-		
+
 		//开始
 		Rect start(350, 120, 100, 50);
 		drawImage(startBackground, start_b_h, 250, 120);
-		
+
 		//帮助
 		Rect help(350, 180, 100, 50);
 		drawImage(startBackground, help_b_h, 250, 120 + 70);
-		
+
 		//设置/模式
 		//RECT mode = { 350, 240, 350 + 100, 240 + 50 };
 		drawImage(startBackground, mode_b_h, 250, 120 + 70 + 70);
@@ -583,7 +609,7 @@ int Pause(struct PLAYER *player1, struct PLAYER *player2, int *clickFlag)
 		imshow(windowName, startBackground);
 		waitKey(33);
 	}
-	
+
 	return 0;
 }
 
@@ -629,10 +655,10 @@ void gameStart()
 	{
 	case 1:	InputBox((LPTSTR)&(player1->name), 10, (LPCTSTR)"请输入名字："); break;
 	case 2: {
-		InputBox((LPTSTR)&(player1->name), 10, (LPCTSTR)"请输入玩家1的名字：");
-		InputBox((LPTSTR)&(player2->name), 10, (LPCTSTR)"请输入玩家2的名字：");
+	InputBox((LPTSTR)&(player1->name), 10, (LPCTSTR)"请输入玩家1的名字：");
+	InputBox((LPTSTR)&(player2->name), 10, (LPCTSTR)"请输入玩家2的名字：");
 	}
-			break;
+	break;
 	case 3:	player1->name[0] = 'A'; player1->name[1] = 'I'; player1->name[2] = '\0'; break;
 	}*/
 	int clickFlag = 0;
@@ -658,7 +684,7 @@ void gameStart()
 				drawPlayer2(player2, direction2);
 			}
 		}
-		
+
 		//物体动画
 		item = get_first_item();
 		while (item != NULL)
@@ -668,7 +694,7 @@ void gameStart()
 
 			judgeState(item, player1);
 			if (settings.mode != 3 && judgeOver(player1, player2))
-					return;
+				return;
 			if (settings.mode == 2)
 				judgeState(item, player2);
 			//储存item里临时的数据，因为删除之后就无法读取item，无法在图形上删除item了
@@ -744,16 +770,16 @@ void itemMove(struct ITEM *item)
 
 int playerMove(struct PLAYER *player)
 {
-//	char c = waitKey(1);
+	char c = cvWaitKey(1);
 	int key = 0;
-	if (/*c == 97*/GetAsyncKeyState(0x41))
+	if (c == 'a'/*GetAsyncKeyState(0x41)*/)
 	{
 		player->x -= speed.player;
 		if (player->x <= 0 + speed.player || player->x >= WIDTH - speed.player) //边界检测
 			player->x += speed.player;
 		return LEFT;
 	}
-	if (/*c == 100*/GetAsyncKeyState(0x44))
+	if (c == 'd'/*GetAsyncKeyState(0x44)*/)
 	{
 		player->x += speed.player;
 		if (player->x <= 0 + speed.player || player->x >= WIDTH - speed.player)
@@ -766,14 +792,15 @@ int playerMove(struct PLAYER *player)
 int playerMove2(struct PLAYER *player)
 {
 	int key = 0;
-	if (GetAsyncKeyState(VK_LEFT))
+	char c = cvWaitKey(1);
+	if (c == 'j'/*GetAsyncKeyState(VK_LEFT)*/)
 	{
 		player->x -= speed.player;
 		if (player->x <= 0 + speed.player || player->x >= WIDTH - speed.player) //边界检测
 			player->x += speed.player;
 		return LEFT;
 	}
-	if (GetAsyncKeyState(VK_RIGHT))
+	if (c == 'l'/*GetAsyncKeyState(VK_RIGHT)*/)
 	{
 		player->x += speed.player;
 		if (player->x <= 0 + speed.player || player->x >= WIDTH - speed.player)
@@ -847,14 +874,15 @@ void Save(struct PLAYER *player)
 {
 	FILE *fp = NULL;
 
-	if (fopen_s(&fp, "data", "ab+"))
+	//	if (fopen_s(&fp, "data", "ab+"))
+	if ((fp = fopen("data", "ab+")) != NULL)
 	{
 		putText(overBackground, String("Save Failed."), Point(50, 50), CV_FONT_HERSHEY_PLAIN, 1, Scalar(255, 255, 255));
 		return;
 	}
 	if (player->name[0] == '\0')
 		strcpy(player->name, "NULL");
-	
+
 	fwrite(player, sizeof(struct PLAYER), 1, fp);
 	fclose(fp);
 	putText(overBackground, String("Saved Successfully."), Point(50, 50), CV_FONT_HERSHEY_PLAIN, 1, Scalar(255, 255, 255));
@@ -872,27 +900,28 @@ void showScore()
 	FILE *fp = NULL;
 	pplayer = (struct PLAYER *)malloc(sizeof(struct PLAYER)*rankNumber);
 
-	if (fopen_s(&fp, "data", "ab+"))
+	//	if (fopen_s(&fp, "data", "ab+"))
+	if ((fp = fopen("data", "ab+")) != NULL)
 	{
-		putText(overBackground, String("File Reading Failed."), Point(50, 50), CV_FONT_HERSHEY_PLAIN, 1, Scalar(255, 255, 255)); 
+		putText(overBackground, String("File Reading Failed."), Point(50, 50), CV_FONT_HERSHEY_PLAIN, 1, Scalar(255, 255, 255));
 		imshow(windowName, overBackground);
 		waitKey(33);
 		return;
 	}
-	
+
 	for (int i = 0; i < rankNumber; i++, lineCount++)
 	{
 		fread(&pplayer[i], sizeof(struct PLAYER), 1, fp);
 		if (feof(fp))
 			break;
 	}
-	
+
 	playerBubbleSort(pplayer, lineCount);
 
 	for (int i = 0; i < lineCount; i++)
 	{
 		sprintf(rankLine[i], "Name: %-10s, Score: %d", pplayer[i].name, pplayer[i].score);
-		putText(overBackground, (String)rankLine[i], Point(50, 100 + i * 20), CV_FONT_HERSHEY_PLAIN, 1, Scalar(255, 255, 255)); 
+		putText(overBackground, (String)rankLine[i], Point(50, 100 + i * 20), CV_FONT_HERSHEY_PLAIN, 1, Scalar(255, 255, 255));
 	}
 	imshow(windowName, overBackground);
 	waitKey(33);
@@ -931,11 +960,11 @@ void overlayImage(Mat* src, Mat* overlay, const Point& location)
 
 void Move()
 {
-	for (int i = 0; i < 70; i+=1)
+	for (int i = 0; i < 70; i += 1)
 	{
 		overlayImage(&startBackground, &startBackgroundBackUp, Point(0, 0));
 		//overlayImage(&startBackground, &exit_b_n, Point(250, 120 + 70 + 70 + 70 + 70 + i));
-		
+
 		imshow(windowName, startBackground);
 		cvWaitKey(100);
 	}
