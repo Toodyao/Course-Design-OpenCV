@@ -7,7 +7,7 @@ FILE* __cdecl __iob_func(unsigned i) {
 	return __acrt_iob_func(i);
 }
 
-#include <graphics.h>
+//#include <graphics.h>
 #include <windows.h>
 #include <stdlib.h>
 #include <stdio.h>
@@ -50,12 +50,9 @@ void drawPlayer(struct PLAYER *player, int direction);
 void drawPlayer2(struct PLAYER *player, int direction);
 void drawScore(int score, int score2);
 void drawPlayerName(struct PLAYER *player, struct PLAYER *player2);
-void drawOver(struct PLAYER *player1, struct PLAYER *player2);
+int drawOver(struct PLAYER *player1, struct PLAYER *player2);
 void drawTransparent(Mat image, Mat logo, Mat mask, int x, int y);
 void drawImage(Mat image, Mat logo, int x, int y);
-//双人重载 不用重载
-//void drawPlayerName(struct PLAYER *player1, struct PLAYER *player2);
-// TODO 加地图移动
 
 //界面函数 //OpenCV改写
 void Menu();
@@ -71,7 +68,6 @@ void gameStart();
 //判断函数
 void judgeState(struct ITEM *item, struct PLAYER *player);
 int judgeOver(struct PLAYER *player1, struct PLAYER *player2);
-enum MOUSE_POSITION judgeMouse();
 void itemMove(struct ITEM *item);
 int playerMove(struct PLAYER *player);
 int playerMove2(struct PLAYER *player);
@@ -87,6 +83,7 @@ void overlayImage(Mat* src, Mat* overlay, const Point& location);
 void Move();
 static void menuOnMouse(int EVENT, int x, int y, int flags, void *userdata);
 static void gameOnMouse(int EVENT, int x, int y, int flags, void *userdata);
+static void overOnMouse(int EVENT, int x, int y, int flags, void *userdata);
 
 enum STATE { //物体的状态
 	ON_SCREEN, //在屏幕上
@@ -129,7 +126,7 @@ struct SPEED { //TODO 填写速度,后期设置难度,可以改速度
 };
 
 struct PLAYER {
-	char name[10]; //玩家名称
+	char name[10] = { '\0' }; //玩家名称
 	double x = 400;
 	double y = 480; //横坐标是一个确定的数
 	int score = 0; //玩家分数
@@ -182,8 +179,7 @@ struct Settings settings = { //默认设置
 int ItemCount = 0;
 const int ItemNumber = 5;//屏幕上物品的总数
 
-IMAGE background, lost, cake, umbrella, bomb_a, bomb_b, imgplayer;
-Mat allBackground(600, 800, CV_8UC3, Scalar(0, 0, 0)), startBackground(600, 800, CV_8UC3, Scalar(0, 0, 0)), startBackgroundBackUp, start_b_h, start_b_n, help_b_h, help_b_n, mode_b_h, mode_b_n, settings_b_h, settings_b_n, rank_b_h, rank_b_n, exit_b_h, exit_b_n;
+Mat allBackground(600, 800, CV_8UC3, Scalar(0, 0, 0)), startBackground(600, 800, CV_8UC3, Scalar(0, 0, 0)), startBackgroundBackUp, overBackground(600, 800, CV_8UC3, Scalar(0, 0, 0)), start_b_h, start_b_n, help_b_h, help_b_n, mode_b_h, mode_b_n, settings_b_h, settings_b_n, rank_b_h, rank_b_n, exit_b_h, exit_b_n;
 Mat img_player, img_umbrella, img_bomb, img_cake, player_m, umbrella_m, bomb_m, cake_m;
 const String windowName("测试");
 
@@ -195,7 +191,7 @@ int main()
 	imshow(windowName, startBackground);
 	
 	Menu();
-	
+
 	destroyAllWindows();
 	return 0;
 }
@@ -418,16 +414,13 @@ void coverItem(int x, int y, enum TYPE type)
 	switch (type)
 	{
 	case UMBRELLA:
-		setlinecolor(BLACK);
-		circle(x, y, 20);// 擦除前一个
+		
 		break;
 	case CAKE:
-		setlinecolor(BLACK);
-		circle(x, y, 20);// 擦除前一个
+		
 		break;
 	case BOMB:
-		setlinecolor(BLACK);
-		circle(x, y, 20);
+		
 		break;
 	}
 }
@@ -476,48 +469,40 @@ void drawPlayerName(struct PLAYER *player, struct PLAYER *player2)
 	//RECT playerNameAera = { WIDTH - 300, BORDER + 80 - 20, WIDTH - 150, BORDER + 120 - 20 };
 	putText(startBackground, player->name, Point(WIDTH - 240, BORDER + 120 - 20), CV_FONT_HERSHEY_PLAIN, 1, Scalar(255, 255, 255));
 	//玩家2	
-	if (settings.mode == 1)
+	if (settings.mode == 2)
 	{
 		putText(startBackground, player->name, Point(WIDTH - 120, BORDER + 120 - 20), CV_FONT_HERSHEY_PLAIN, 1, Scalar(255, 255, 255));
 		//RECT playerNameAera2 = { WIDTH - 180, BORDER + 80 - 20, WIDTH - 30, BORDER + 120 - 20 };
 	}
 }
 
-void drawOver(struct PLAYER *player1, struct PLAYER *player2)
+int drawOver(struct PLAYER *player1, struct PLAYER *player2)
 {
-	cleardevice();
-	MOUSEMSG mouse;
-	mouse.uMsg = NULL;
-	setlinecolor(WHITE);
+	overBackground = (600, 800, CV_8UC3, Scalar(0, 0, 0));
+	int clickFlag = 0;
+	setMouseCallback(windowName, overOnMouse, &clickFlag);
 	while (1)
 	{
 		char score[20] = { '\0' };
-		sprintf_s(score, "你的成绩是: %d 分", player1->score);
-		outtextxy(300, 300, _T("游戏结束"));
-		outtextxy(300, 320, (LPCTSTR)score);
+		sprintf_s(score, "Your score is: %d", player1->score);
+		putText(overBackground, String("Game Over"), Point(300, 300), CV_FONT_HERSHEY_PLAIN, 1, Scalar(255, 255, 255));
+		putText(overBackground, (String)score, Point(300, 320), CV_FONT_HERSHEY_PLAIN, 1, Scalar(255, 255, 255));
 
-		RECT saveScore = { 200, 400, 200 + 100, 400 + 40 };
-		rectangle(200, 400, 200 + 100, 400 + 40);
-		drawtext(_T("保存成绩"), &saveScore, DT_CENTER | DT_SINGLELINE | DT_VCENTER);
+		//RECT saveScore = { 200, 400, 200 + 100, 400 + 40 };
+		putText(overBackground, String("Save Score"), Point(200, 400 + 40), CV_FONT_HERSHEY_PLAIN, 1, Scalar(255, 255, 255));
 
-		RECT toMenu = { 200 + 110, 400, 200 + 100 + 110, 400 + 40 };
-		rectangle(200 + 110, 400, 200 + 100 + 110, 400 + 40);
-		drawtext(_T("返回主菜单"), &toMenu, DT_CENTER | DT_SINGLELINE | DT_VCENTER);
+		//RECT toMenu = { 200 + 110, 400, 200 + 100 + 110, 400 + 40 };
+		putText(overBackground, String("Return To Menu"), Point(200 + 110, 400 + 40), CV_FONT_HERSHEY_PLAIN, 1, Scalar(255, 255, 255));
 
-		if (MouseHit())
-		{
-			mouse = GetMouseMsg();
-			if (((200 + 110) <= mouse.x && mouse.x <= (200 + 100 + 110)) && (400 <= mouse.y && mouse.y <= (400 + 40)) && mouse.uMsg == WM_LBUTTONDOWN)
-				Menu();
-			if (((200) <= mouse.x && mouse.x <= (200 + 100)) && (400 <= mouse.y && mouse.y <= (400 + 40)) && mouse.uMsg == WM_LBUTTONDOWN) {
-				Save(player1);
-			}
-
-		}
-		else
-			mouse.uMsg = NULL;
-		FlushBatchDraw();
+		if (clickFlag == 1)
+			return 1;
+		if (clickFlag == 2)
+			Save(player1);
+		clickFlag = 0;
+		imshow(windowName, overBackground);
+		waitKey(33);
 	}
+	return 0;
 }
 
 void drawTransparent(Mat image, Mat logo, Mat mask, int x, int y)
@@ -684,8 +669,6 @@ void gameStart()
 		for (int i = ItemNumber - ItemCount; i > 0; i--)
 			addItem();
 
-		//BeginBatchDraw();
-
 		//画背景和框架
 		drawBackground();
 		gameFramwork(settings);
@@ -707,15 +690,12 @@ void gameStart()
 		item = get_first_item();
 		while (item != NULL)
 		{
-			/*if (Pause(player1, player2) || returnToMenu())
-				return;*/
-			
 			if (returnToMenu(&clickFlag) || Pause(player1, player2, &clickFlag))
 				return;
 
 			judgeState(item, player1);
-			if (settings.mode != 3)
-				//judgeOver(player1, player2);
+			if (settings.mode != 3 && judgeOver(player1, player2))
+					return;
 			if (settings.mode == 2)
 				judgeState(item, player2);
 			//储存item里临时的数据，因为删除之后就无法读取item，无法在图形上删除item了
@@ -725,9 +705,8 @@ void gameStart()
 
 			if (delItem())
 			{
-			
-			}
 				//coverItem(temp_x, temp_y, temp_type);
+			}
 			else {
 				itemMove(item);
 				//AI移动
@@ -774,67 +753,13 @@ void judgeState(struct ITEM *item, struct PLAYER *player)
 int judgeOver(struct PLAYER *player1, struct PLAYER *player2)
 {
 	if (player1->life == 0 || player2->life == 0)
-		drawOver(player1, player2);
-	else
-		return 0;
-}
+	{
+		setMouseCallback(windowName, NULL, NULL);
+		if (drawOver(player1, player2))
+			return 1;
+	}
 
-enum MOUSE_POSITION judgeMouse()
-{
-	MOUSEMSG mouse = GetMouseMsg();
-	//开始
-	if ((350 <= mouse.x && mouse.x <= (350 + 100)) && (120 <= mouse.y && mouse.y <= (120 + 50)))
-		if (mouse.mkLButton)//按下左键
-			return HIT_START;
-		else
-			return ON_START;
-	//帮助
-	if ((350 <= mouse.x && mouse.x <= (350 + 100)) && (180 <= mouse.y && mouse.y <= (180 + 50)))
-		if (mouse.mkLButton)//按下左键
-			return HIT_HELP;
-		else
-			return ON_HELP;
-	//设置/模式 不要
-	//if ((350 <= mouse.x && mouse.x <= (350 + 100)) && (180 <= mouse.y && mouse.y <= (180 + 50)))
-	//	if (mouse.mkLButton)//按下左键
-	//		return HIT_HELP;
-	//	else
-	//		return ON_HELP;
-	//else
-	//	return OFF_START;
-
-	//单人
-	if ((460 <= mouse.x && mouse.x <= (460 + 100)) && (240 <= mouse.y && mouse.y <= (240 + 50)))
-		if (mouse.mkLButton)//按下左键
-			return HIT_SINGLE;
-		else
-			return ON_SINGLE;
-	//双人
-	if ((570 <= mouse.x && mouse.x <= (570 + 100)) && (240 <= mouse.y && mouse.y <= (240 + 50)))
-		if (mouse.mkLButton)//按下左键
-			return HIT_MULTI;
-		else
-			return ON_MULTI;
-	//AI
-	if ((680 <= mouse.x && mouse.x <= (680 + 100)) && (240 <= mouse.y && mouse.y <= (240 + 50)))
-		if (mouse.mkLButton)//按下左键
-			return HIT_AI;
-		else
-			return ON_AI;
-	//排名
-	if ((350 <= mouse.x && mouse.x <= (350 + 100)) && (300 <= mouse.y && mouse.y <= (300 + 50)))
-		if (mouse.mkLButton)//按下左键
-			return HIT_RANK;
-		else
-			return ON_RANK;
-	//退出
-	if ((350 <= mouse.x && mouse.x <= (350 + 100)) && (360 <= mouse.y && mouse.y <= (360 + 50)))
-		if (mouse.mkLButton)//按下左键
-			return HIT_EXIT;
-		else
-			return ON_EXIT;
-
-	return OFF;
+	return 0;
 }
 
 void itemMove(struct ITEM *item)
@@ -954,13 +879,17 @@ void Save(struct PLAYER *player)
 
 	if (fopen_s(&fp, "data", "ab+"))
 	{
-		outtextxy(50, 50, _T("保存失败"));
+		putText(overBackground, String("Save Failed."), Point(50, 50), CV_FONT_HERSHEY_PLAIN, 1, Scalar(255, 255, 255));
 		return;
 	}
+	if (player->name[0] == '\0')
+		strcpy(player->name, "NULL");
+	
 	fwrite(player, sizeof(struct PLAYER), 1, fp);
 	fclose(fp);
-	outtextxy(50, 50, _T("保存成功"));
-	FlushBatchDraw();
+	putText(overBackground, String("Saved Successfully."), Point(50, 50), CV_FONT_HERSHEY_PLAIN, 1, Scalar(255, 255, 255));
+	imshow(windowName, overBackground);
+	waitKey(33);
 	showScore();
 }
 
@@ -968,33 +897,37 @@ void showScore()
 {
 	int const rankNumber = 10;
 	int lineCount = 0;
-	char rankLine[10][20] = { '\0' };
-	struct PLAYER *pplayer = (struct PLAYER *)malloc(sizeof(struct PLAYER)*rankNumber);
-	struct PLAYER static *pplayer_head = pplayer;
+	char rankLine[15][50] = { '\0' };
+	struct PLAYER *pplayer = NULL;
 	FILE *fp = NULL;
+	pplayer = (struct PLAYER *)malloc(sizeof(struct PLAYER)*rankNumber);
 
 	if (fopen_s(&fp, "data", "ab+"))
 	{
-		outtextxy(50, 100, _T("读取失败"));
-		FlushBatchDraw();
+		putText(overBackground, String("File Reading Failed."), Point(50, 50), CV_FONT_HERSHEY_PLAIN, 1, Scalar(255, 255, 255)); 
+		imshow(windowName, overBackground);
+		waitKey(33);
 		return;
 	}
-
-	for (int i = 0; i < rankNumber; i++, lineCount++, pplayer++)
+	// TODO 为什么读出了屯屯屯
+	for (int i = 0; i < rankNumber; i++, lineCount++)
 	{
-		fread(pplayer, sizeof(struct PLAYER), 1, fp);
+		fread(&pplayer[i], sizeof(struct PLAYER), 1, fp);
 		if (feof(fp))
 			break;
 	}
-	pplayer = pplayer_head;
+	
 	playerBubbleSort(pplayer, lineCount);
-	pplayer = pplayer_head;
-	for (int i = 0; i < lineCount; i++, pplayer++)
+
+	for (int i = 0; i < lineCount; i++)
 	{
-		sprintf_s(rankLine[i], "姓名：%s, 成绩：%d", pplayer->name, pplayer->score);
-		outtextxy(50, 100 + i * 20, (LPCTSTR)rankLine[i]);
-		FlushBatchDraw();
+		sprintf(rankLine[i], "Name: %-10s, Score: %d", pplayer[i].name, pplayer[i].score);
+		putText(overBackground, (String)rankLine[i], Point(50, 100 + i * 20), CV_FONT_HERSHEY_PLAIN, 1, Scalar(255, 255, 255)); 
 	}
+	imshow(windowName, overBackground);
+	waitKey(33);
+	free(pplayer);
+	pplayer = NULL;
 	fclose(fp);
 }
 
@@ -1052,30 +985,12 @@ static void menuOnMouse(int EVENT, int x, int y, int flags, void *userdata)
 			setMouseCallback(windowName, NULL, NULL);
 			gameStart();
 		}
-			
 	}
 	else 
 	{
 		p->x = 0;
 		p->y = 0;
 	}
-	
-	/*switch (EVENT)
-	{
-	case EVENT_LBUTTONDOWN:
-	{
-		if (x >= 350 && x <= 350 + 100 && y >= 120 && y <= 120 + 50)
-		{
-			circle(hh, p, 2, Scalar(0, 0, 255), 3);
-			gameStart();
-			
-		}
-			
-		if (x >= 350 && x <= 350 + 100 && y >= 180 && y <= 180 + 50)
-			circle(hh, p, 2, Scalar(255, 0, 0), 3);
-	}
-	break;
-	}*/
 }
 
 static void gameOnMouse(int EVENT, int x, int y, int flags, void *userdata)
@@ -1089,10 +1004,15 @@ static void gameOnMouse(int EVENT, int x, int y, int flags, void *userdata)
 
 	//开始
 	if ((150 <= x && x <= 220) && ((BORDER + 40) <= y && y <= (BORDER + 80)) && EVENT == EVENT_LBUTTONDOWN)
-	{
 		*clickFlag = 2;
-		/**clickFlag = pauseFlag ? 3 : 4;
-		pauseFlag = !pauseFlag;*/
-	}
-		
+}
+
+static void overOnMouse(int EVENT, int x, int y, int flags, void *userdata)
+{
+	int *clickFlag = (int *)userdata;
+	if ((200 + 110) <= x && x <= (200 + 100 + 110) && 400 <= y && y <= (400 + 40) && EVENT == EVENT_LBUTTONDOWN)
+		*clickFlag = 1;
+	if ((200) <= x && x <= (200 + 100) && 400 <= y && y <= (400 + 40) && EVENT == EVENT_LBUTTONDOWN)
+		*clickFlag = 2;
+
 }
