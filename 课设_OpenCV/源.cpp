@@ -982,9 +982,9 @@ static void menuOnMouse(int EVENT, int x, int y, int flags, void *userdata)
 {
 	Point *p = (Point *)userdata;
 
-	if (350 <= x && x <= 350 + 100 && 120 <= y && y <= 120 + 50) //开始
+	if (250 <= x && x <= 250 + 300 && 120 <= y && y <= 120 + 71) //开始
 	{
-		p->x = 350;
+		p->x = 250;
 		p->y = 120;
 		if (EVENT == EVENT_LBUTTONDOWN)
 		{
@@ -992,9 +992,9 @@ static void menuOnMouse(int EVENT, int x, int y, int flags, void *userdata)
 			gameStart();
 		}
 	}
-	else if (350 <= x && x <= 350 + 100 && 180 <= y && y <= 180 + 50) //帮助
+	else if (250 <= x && x <= 250 + 300 && 180 <= y && y <= 180 + 71) //帮助
 	{
-		p->x = 350;
+		p->x = 250;
 		p->y = 180;
 		if (EVENT == EVENT_LBUTTONDOWN)
 		{
@@ -1002,10 +1002,10 @@ static void menuOnMouse(int EVENT, int x, int y, int flags, void *userdata)
 			gameStart();*/
 		}
 	}
-	else if (350 <= x && x <= 350 + 100 && 240 <= y && y <= 240 + 50) //设置
+	else if (250 <= x && x <= 250 + 300 && 120 + 70 + 70 <= y && y <= 120 + 70 + 70 + 71) //设置
 	{
-		p->x = 350;
-		p->y = 240;
+		p->x = 250;
+		p->y = 120 + 70 + 70;
 		if (EVENT == EVENT_LBUTTONDOWN)
 		{
 			/*setMouseCallback(windowName, NULL, NULL);
@@ -1046,20 +1046,20 @@ static void menuOnMouse(int EVENT, int x, int y, int flags, void *userdata)
 			gameStart();*/
 		}
 	}
-	else if (350 <= x && x <= 350 + 100 && 300 <= y && y <= 300 + 50) //排名
+	else if (250 <= x && x <= 250 + 300 && 120 + 70 + 70 + 70 + 70 <= y && y <= 120 + 70 + 70 + 70 + 70 + 71) //排名
 	{
-		p->x = 350;
-		p->y = 300;
+		p->x = 250;
+		p->y = 120 + 70 + 70 + 70 + 70;
 		if (EVENT == EVENT_LBUTTONDOWN)
 		{
 			setMouseCallback(windowName, NULL, NULL);
 			showScore();
 		}
 	}
-	else if (350 <= x && x <= 350 + 100 && 360 <= y && y <= 360 + 50) //排名
+	else if (250 <= x && x <= 250 + 300 && 120 + 70 + 70 + 70 + 70 + 70 <= y && y <= 120 + 70 + 70 + 70 + 70 + 70 + 71) //退出
 	{
-		p->x = 350;
-		p->y = 360;
+		p->x = 250;
+		p->y = 120 + 70 + 70 + 70 + 70 + 70;
 		if (EVENT == EVENT_LBUTTONDOWN)
 		{
 			setMouseCallback(windowName, NULL, NULL);
