@@ -176,7 +176,8 @@ struct Settings settings = { //默认设置
 int ItemCount = 0;
 const int ItemNumber = 10;//屏幕上物品的总数
 
-Mat allBackground(600, 800, CV_8UC3, Scalar(0, 0, 0)), startBackground(600, 800, CV_8U, Scalar(0, 0, 0)), startBackgroundBackUp, overBackground(600, 800, CV_8UC3, Scalar(0, 0, 0)), start_b_h, start_b_h_m, start_b_n, help_b_h, help_b_n, mode_b_h, mode_b_n, settings_b_h, settings_b_n, rank_b_h, rank_b_n, exit_b_h, exit_b_n;
+Mat allBackground(600, 800, CV_8UC3, Scalar(0, 0, 0)), startBackground(600, 800, CV_8UC3, Scalar(0, 0, 0)), startBackgroundBackUp, overBackground(600, 800, CV_8UC3, Scalar(0, 0, 0)), start_b_h, start_b_n, help_b_h, help_b_n, mode_b_h, mode_b_n, settings_b_h, settings_b_n, rank_b_h, rank_b_n, exit_b_h, exit_b_n;
+Mat start_m, help_m, mode_m, settings_m, rank_m, exit_m;
 Mat img_player, img_umbrella, img_bomb, img_cake, player_m, umbrella_m, bomb_m, cake_m;
 const String windowName("测试");
 
@@ -294,26 +295,31 @@ void loadAllImages()
 	*/
 	startBackgroundBackUp = imread("img/bkg.png");
 	start_b_h = imread("img/buttons/start_h.bmp");
-	start_b_h_m = imread("img/buttons/start_h_m.bmp");
-	start_b_n = imread("img/buttons/start_n.png");
-	help_b_h = imread("img/buttons/help_h.png");
-	help_b_n = imread("img/buttons/help_n.png");
-	mode_b_h = imread("img/buttons/mode_h.png");
-	mode_b_n = imread("img/buttons/mode_n.png");
-	settings_b_h = imread("img/buttons/settings_h.png");
-	settings_b_n = imread("img/buttons/settings_n.png");
-	rank_b_h = imread("img/buttons/rank_h.png");
-	rank_b_n = imread("img/buttons/rank_n.png");
-	exit_b_h = imread("img/buttons/exit_h.png");
-	exit_b_n = imread("img/buttons/exit_n.png");
+	start_b_n = imread("img/buttons/start_n.bmp");
+	start_m = imread("img/buttons/start_m.bmp");
+	help_b_h = imread("img/buttons/help_h.bmp");
+	help_b_n = imread("img/buttons/help_n.bmp");
+	help_m = imread("img/buttons/help_m.bmp");
+	mode_b_h = imread("img/buttons/mode_h.bmp");
+	mode_b_n = imread("img/buttons/mode_n.bmp");
+	mode_m = imread("img/buttons/mode_m.bmp");
+	settings_b_h = imread("img/buttons/settings_h.bmp");
+	settings_b_n = imread("img/buttons/settings_n.bmp");
+	settings_m = imread("img/buttons/settings_m.bmp");
+	rank_b_h = imread("img/buttons/rank_h.bmp");
+	rank_b_n = imread("img/buttons/rank_n.bmp");
+	rank_m = imread("img/buttons/rank_m.bmp");
+	exit_b_h = imread("img/buttons/exit_h.bmp");
+	exit_b_n = imread("img/buttons/exit_n.bmp");
+	exit_m = imread("img/buttons/exit_m.bmp");
 	img_player = imread("img/main/player.bmp");
 	img_umbrella = imread("img/main/umbrella.bmp");
 	img_bomb = imread("img/main/bomb.bmp");
 	img_cake = imread("img/main/cake.bmp");
-	player_m = imread("img/main/player_b.bmp");
-	umbrella_m = imread("img/main/umbrella_b.bmp");
-	bomb_m = imread("img/main/bomb_b.bmp");
-	cake_m = imread("img/main/cake_b.bmp");
+	player_m = imread("img/main/player_m.bmp");
+	umbrella_m = imread("img/main/umbrella_m.bmp");
+	bomb_m = imread("img/main/bomb_m.bmp");
+	cake_m = imread("img/main/cake_m.bmp");
 
 }
 
@@ -546,26 +552,26 @@ void Menu()
 	Point p(0, 0);
 	while (1)
 	{
-		//drawBackground();
+		drawBackground();
+		//TODO 需要
 
 		//开始
 		Rect start(350, 120, 100, 50);
-		drawTransparent(startBackground, start_b_h, start_b_h_m, 250, 120);
-		//drawImage(startBackground, start_b_h, 250, 120);
+		drawTransparent(startBackground, start_b_h, start_m, 250, 120);
 
 		//帮助
 		Rect help(350, 180, 100, 50);
-		drawImage(startBackground, help_b_h, 250, 120 + 70);
+		drawTransparent(startBackground, help_b_h, help_m, 250, 120 + 70);
 
 		//设置/模式
-		Rect mode(350, 240, 100, 50);
-		drawImage(startBackground, mode_b_h, 250, 120 + 70 + 70);
+		//RECT mode = { 350, 240, 350 + 100, 240 + 50 };
+		drawTransparent(startBackground, settings_b_h, settings_m, 250, 120 + 70 + 70);
+
 
 		//单人
 		Rect singleplayer(460, 120 + 70 + 70 + 70 + 10, 100, 50);
 		rectangle(startBackground, singleplayer, Scalar(255, 255, 255));
 		putText(startBackground, String("Single"), Point(460, 120 + 70 + 70 + 70 + 10), CV_FONT_HERSHEY_PLAIN, 1, Scalar(255, 255, 255));
-
 		//双人
 		Rect multiplayer(570, 120 + 70 + 70 + 70 + 10, 100, 50);
 		rectangle(startBackground, multiplayer, Scalar(255, 255, 255));
@@ -575,13 +581,14 @@ void Menu()
 		Rect ai(680, 120 + 70 + 70 + 70 + 10, 100, 50);
 		rectangle(startBackground, ai, Scalar(255, 255, 255));
 		putText(startBackground, String("AI"), Point(680, 120 + 70 + 70 + 70 + 10), CV_FONT_HERSHEY_PLAIN, 1, Scalar(255, 255, 255));
-		
+
 		//排名
 		//RECT rank = { 350, 300, 350 + 100, 300 + 50 };
-		drawImage(startBackground, rank_b_h, 250, 120 + 70 + 70 + 70 + 70);
+		drawTransparent(startBackground, rank_b_h, rank_m, 250, 120 + 70 + 70 + 70 + 70);
+
 		//退出
 		//RECT exit = { 350, 360, 350 + 100, 360 + 50 };
-		drawImage(startBackground, exit_b_h, 250, 120 + 70 + 70 + 70 + 70 + 70);
+		drawTransparent(startBackground, exit_b_h, exit_m, 250, 120 + 70 + 70 + 70 + 70 + 70);
 
 		circle(startBackground, p, 10, Scalar(0, 255, 255), 3);
 		switch (settings.mode)
