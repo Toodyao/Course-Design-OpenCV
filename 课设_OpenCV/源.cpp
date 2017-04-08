@@ -176,8 +176,8 @@ struct Settings settings = { //默认设置
 int ItemCount = 0;
 const int ItemNumber = 10;//屏幕上物品的总数
 
-Mat allBackground(600, 800, CV_8UC3, Scalar(0, 0, 0)), startBackground(600, 800, CV_8UC3, Scalar(0, 0, 0)), startBackgroundBackUp, overBackground(600, 800, CV_8UC3, Scalar(0, 0, 0)), start_b_h, start_b_n, help_b_h, help_b_n, mode_b_h, mode_b_n, settings_b_h, settings_b_n, rank_b_h, rank_b_n, exit_b_h, exit_b_n;
-Mat start_m, help_m, mode_m, settings_m, rank_m, exit_m;
+Mat allBackground(600, 800, CV_8UC3, Scalar(0, 0, 0)), startBackground(600, 800, CV_8UC3, Scalar(0, 0, 0)), startBackgroundBackUp, overBackground(600, 800, CV_8UC3, Scalar(0, 0, 0)), start_b_h, start_b_n, help_b_h, help_b_n, mode_b_h, mode_b_n, settings_b_h, settings_b_n, rank_b_h, rank_b_n, exit_b_h, exit_b_n, single, single_n, select;
+Mat start_m, help_m, mode_m, settings_m, rank_m, exit_m, single_m, select_m;
 Mat img_player, img_umbrella, img_bomb, img_cake, player_m, umbrella_m, bomb_m, cake_m;
 const String windowName("测试");
 
@@ -312,6 +312,10 @@ void loadAllImages()
 	exit_b_h = imread("img/buttons/exit_h.bmp");
 	exit_b_n = imread("img/buttons/exit_n.bmp");
 	exit_m = imread("img/buttons/exit_m.bmp");
+
+	select = imread("img/buttons/select.bmp");
+	select_m = imread("img/buttons/select_m.bmp");
+
 	img_player = imread("img/main/player.bmp");
 	img_umbrella = imread("img/main/umbrella.bmp");
 	img_bomb = imread("img/main/bomb.bmp");
@@ -567,20 +571,26 @@ void Menu()
 		//RECT mode = { 350, 240, 350 + 100, 240 + 50 };
 		drawTransparent(startBackground, settings_b_h, settings_m, 250, 120 + 70 + 70);
 
+		switch (settings.mode)
+		{
+		case 1:drawTransparent(startBackground, select, select_m, 460, 120 + 70 + 70 + 70 + 10); break;
+		case 2:drawTransparent(startBackground, select, select_m, 570, 120 + 70 + 70 + 70 + 10);  break;
+		case 3:drawTransparent(startBackground, select, select_m, 680, 120 + 70 + 70 + 70 + 10); break;
+		}
 
 		//单人
 		Rect singleplayer(460, 120 + 70 + 70 + 70 + 10, 100, 50);
 		rectangle(startBackground, singleplayer, Scalar(255, 255, 255));
-		putText(startBackground, String("Single"), Point(460, 120 + 70 + 70 + 70 + 10), CV_FONT_HERSHEY_PLAIN, 1, Scalar(255, 255, 255));
+		putText(startBackground, String("Single"), Point(460 + 25, 120 + 70 + 70 + 70 + 10 + 30), CV_FONT_HERSHEY_PLAIN, 1.2, Scalar(255, 255, 255));
 		//双人
 		Rect multiplayer(570, 120 + 70 + 70 + 70 + 10, 100, 50);
 		rectangle(startBackground, multiplayer, Scalar(255, 255, 255));
-		putText(startBackground, String("Multiplayer"), Point(570, 120 + 70 + 70 + 70 + 10), CV_FONT_HERSHEY_PLAIN, 1, Scalar(255, 255, 255));
+		putText(startBackground, String("Multiplayer"), Point(570, 120 + 70 + 70 + 70 + 10 + 30), CV_FONT_HERSHEY_PLAIN, 1.1, Scalar(255, 255, 255));
 
 		//AI
 		Rect ai(680, 120 + 70 + 70 + 70 + 10, 100, 50);
 		rectangle(startBackground, ai, Scalar(255, 255, 255));
-		putText(startBackground, String("AI"), Point(680, 120 + 70 + 70 + 70 + 10), CV_FONT_HERSHEY_PLAIN, 1, Scalar(255, 255, 255));
+		putText(startBackground, String("AI"), Point(680 + 40, 120 + 70 + 70 + 70 + 10 + 30), CV_FONT_HERSHEY_PLAIN, 1.2, Scalar(255, 255, 255));
 
 		//排名
 		//RECT rank = { 350, 300, 350 + 100, 300 + 50 };
@@ -599,12 +609,7 @@ void Menu()
 		//case 0: break;
 		}
 		//circle(startBackground, p, 10, Scalar(0, 255, 255), 3);
-		switch (settings.mode)
-		{
-		case 1:circle(startBackground, Point(460, 120 + 70 + 70 + 70 + 10), 3, Scalar(255, 255, 0), 3); break;
-		case 2:circle(startBackground, Point(570, 120 + 70 + 70 + 70 + 10), 3, Scalar(255, 255, 0), 3);  break;
-		case 3:circle(startBackground, Point(680, 120 + 70 + 70 + 70 + 10), 3, Scalar(255, 255, 0), 3); break;
-		}
+		
 
 		setMouseCallback(windowName, menuOnMouse, &p);
 		imshow(windowName, startBackground);
