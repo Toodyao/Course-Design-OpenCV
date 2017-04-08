@@ -176,7 +176,7 @@ struct Settings settings = { //默认设置
 int ItemCount = 0;
 const int ItemNumber = 10;//屏幕上物品的总数
 
-Mat allBackground(600, 800, CV_8UC3, Scalar(0, 0, 0)), startBackground(600, 800, CV_8UC3, Scalar(0, 0, 0)), startBackgroundBackUp, overBackground(600, 800, CV_8UC3, Scalar(0, 0, 0)), start_b_h, start_b_n, help_b_h, help_b_n, mode_b_h, mode_b_n, settings_b_h, settings_b_n, rank_b_h, rank_b_n, exit_b_h, exit_b_n;
+Mat allBackground(600, 800, CV_8UC3, Scalar(0, 0, 0)), startBackground(600, 800, CV_8UC3, Scalar(0, 0, 0)), startBackgroundBackUp, overBackground(600, 800, CV_8UC3, Scalar(0, 0, 0)), start_h, start_n, start_m, help_h, help_n, help_m, mode_h, mode_n, mode_m, settings_h, settings_n, settings_m, rank_h, rank_n, rank_m, exit_h, exit_n, exit_m;
 Mat img_player, img_umbrella, img_bomb, img_cake, player_m, umbrella_m, bomb_m, cake_m;
 const String windowName("测试");
 
@@ -269,42 +269,26 @@ void initItemToZero()
 void loadAllImages()
 {
 	startBackground = (600, 800, CV_8UC3, Scalar(0, 0, 0));
-	/*
-	startBackgroundBackUp = imread("img\\bkg.png");
-	start_b_h = imread("img\\buttons\\start_h.png");
-	start_b_n = imread("img\\buttons\\start_n.png");
-	help_b_h = imread("img\\buttons\\help_h.png");
-	help_b_n = imread("img\\buttons\\help_n.png");
-	mode_b_h = imread("img\\buttons\\mode_h.png");
-	mode_b_n = imread("img\\buttons\\mode_n.png");
-	settings_b_h = imread("img\\buttons\\settings_h.png");
-	settings_b_n = imread("img\\buttons\\settings_n.png");
-	rank_b_h = imread("img\\buttons\\rank_h.png");
-	rank_b_n = imread("img\\buttons\\rank_n.png");
-	exit_b_h = imread("img\\buttons\\exit_h.png");
-	exit_b_n = imread("img\\buttons\\exit_n.png");
-	img_player = imread("img\\main\\player.bmp");
-	img_umbrella = imread("img\\main\\umbrella.bmp");
-	img_bomb = imread("img\\main\\bomb.bmp");
-	img_cake = imread("img\\main\\cake.bmp");
-	player_m = imread("img\\main\\player_b.bmp");
-	umbrella_m = imread("img\\main\\umbrella_b.bmp");
-	bomb_m = imread("img\\main\\bomb_b.bmp");
-	cake_m = imread("img\\main\\cake_b.bmp");
-	*/
-	startBackgroundBackUp = imread("img/bkg.png");
-	start_b_h = imread("img/buttons/start_h.png");
-	start_b_n = imread("img/buttons/start_n.png");
-	help_b_h = imread("img/buttons/help_h.png");
-	help_b_n = imread("img/buttons/help_n.png");
-	mode_b_h = imread("img/buttons/mode_h.png");
-	mode_b_n = imread("img/buttons/mode_n.png");
-	settings_b_h = imread("img/buttons/settings_h.png");
-	settings_b_n = imread("img/buttons/settings_n.png");
-	rank_b_h = imread("img/buttons/rank_h.png");
-	rank_b_n = imread("img/buttons/rank_n.png");
-	exit_b_h = imread("img/buttons/exit_h.png");
-	exit_b_n = imread("img/buttons/exit_n.png");
+	startBackgroundBackUp = imread("img/bkg.bmp");
+	start_h = imread("img/buttons/start_h.bmp");
+	start_n = imread("img/buttons/start_n.bmp");
+	start_m = imread("img/buttons/start_h_m.bmp");
+	help_h = imread("img/buttons/help_h.bmp");
+	help_n = imread("img/buttons/help_n.bmp");
+	help_m = imread("img/buttons/help_m.bmp");
+	mode_h = imread("img/buttons/mode_h.bmp");
+	mode_n = imread("img/buttons/mode_n.bmp");
+	mode_m = imread("img/buttons/mode_m.bmp");
+	settings_h = imread("img/buttons/settings_h.bmp");
+	settings_n = imread("img/buttons/settings_n.bmp");
+	settings_m = imread("img/buttons/settings_m.bmp");
+	rank_h = imread("img/buttons/rank_h.bmp");
+	rank_n = imread("img/buttons/rank_n.bmp");
+	rank_m = imread("img/buttons/rank_m.bmp");
+	exit_h = imread("img/buttons/exit_h.bmp");
+	exit_n = imread("img/buttons/exit_n.png");
+	exit_m = imread("img/buttons/exit_m.bmp");
+
 	img_player = imread("img/main/player.bmp");
 	img_umbrella = imread("img/main/umbrella.bmp");
 	img_bomb = imread("img/main/bomb.bmp");
@@ -546,48 +530,47 @@ void Menu()
 	while (1)
 	{
 		drawBackground();
-		//TODO 需要
 
 		//开始
 		Rect start(350, 120, 100, 50);
-		drawImage(startBackground, start_b_h, 250, 120);
+		drawTransparent(startBackground, start_h, start_m, 250, 120);
 
 		//帮助
 		Rect help(350, 180, 100, 50);
-		drawImage(startBackground, help_b_h, 250, 120 + 70);
+		drawTransparent(startBackground, help_h, help_m, 250, 120 + 70);
 
 		//设置/模式
-		//RECT mode = { 350, 240, 350 + 100, 240 + 50 };
-		drawImage(startBackground, mode_b_h, 250, 120 + 70 + 70);
+		Rect mode(350, 240, 100, 50);
+		drawTransparent(startBackground, mode_h, mode_m, 250, 120 + 70 + 70);
 
 		//单人
-		Rect singleplayer(460, 240, 100, 50);
+		Rect singleplayer(460, 120 + 70 + 70 + 70 + 10, 100, 50);
 		rectangle(startBackground, singleplayer, Scalar(255, 255, 255));
-		putText(startBackground, String("Single"), Point(460, 240), CV_FONT_HERSHEY_PLAIN, 1, Scalar(255, 255, 255));
+		putText(startBackground, String("Single"), Point(460, 120 + 70 + 70 + 70 + 10), CV_FONT_HERSHEY_PLAIN, 1, Scalar(255, 255, 255));
+
 		//双人
-		Rect multiplayer(570, 240, 100, 50);
+		Rect multiplayer(570, 120 + 70 + 70 + 70 + 10, 100, 50);
 		rectangle(startBackground, multiplayer, Scalar(255, 255, 255));
-		putText(startBackground, String("Multiplayer"), Point(570, 240), CV_FONT_HERSHEY_PLAIN, 1, Scalar(255, 255, 255));
-		//rectangle(570, 240, 570 + 100, 240 + 50);
-		//drawtext(_T("双人"), &multiplayer, DT_CENTER | DT_SINGLELINE | DT_VCENTER);
+		putText(startBackground, String("Multiplayer"), Point(570, 120 + 70 + 70 + 70 + 10), CV_FONT_HERSHEY_PLAIN, 1, Scalar(255, 255, 255));
+
 		//AI
-		Rect ai(680, 240, 100, 50);
+		Rect ai(680, 120 + 70 + 70 + 70 + 10, 100, 50);
 		rectangle(startBackground, ai, Scalar(255, 255, 255));
-		putText(startBackground, String("AI"), Point(680, 240), CV_FONT_HERSHEY_PLAIN, 1, Scalar(255, 255, 255));
-		//drawtext(_T("AI"), &ai, DT_CENTER | DT_SINGLELINE | DT_VCENTER);
+		putText(startBackground, String("AI"), Point(680, 120 + 70 + 70 + 70 + 10), CV_FONT_HERSHEY_PLAIN, 1, Scalar(255, 255, 255));
+		
 		//排名
 		//RECT rank = { 350, 300, 350 + 100, 300 + 50 };
-		drawImage(startBackground, rank_b_h, 250, 120 + 70 + 70 + 70);
+		drawTransparent(startBackground, rank_h, rank_m, 250, 120 + 70 + 70 + 70 + 70);
 		//退出
 		//RECT exit = { 350, 360, 350 + 100, 360 + 50 };
-		drawImage(startBackground, exit_b_h, 250, 120 + 70 + 70 + 70 + 70);
+		drawTransparent(startBackground, exit_h, exit_m, 250, 120 + 70 + 70 + 70 + 70 + 70);
 
 		circle(startBackground, p, 10, Scalar(0, 255, 255), 3);
 		switch (settings.mode)
 		{
-		case 1:circle(startBackground, Point(460, 240), 3, Scalar(255, 255, 0), 3); break;
-		case 2:circle(startBackground, Point(570, 240), 3, Scalar(255, 255, 0), 3);  break;
-		case 3:circle(startBackground, Point(680, 240), 3, Scalar(255, 255, 0), 3); break;
+		case 1:circle(startBackground, Point(460, 120 + 70 + 70 + 70 + 10), 3, Scalar(255, 255, 0), 3); break;
+		case 2:circle(startBackground, Point(570, 120 + 70 + 70 + 70 + 10), 3, Scalar(255, 255, 0), 3);  break;
+		case 3:circle(startBackground, Point(680, 120 + 70 + 70 + 70 + 10), 3, Scalar(255, 255, 0), 3); break;
 		}
 
 		setMouseCallback(windowName, menuOnMouse, &p);
@@ -628,9 +611,8 @@ void Exit()
 
 void drawBackground()
 {
-	startBackground = (600, 800, CV_8UC3, Scalar(0, 0, 0)); //将startBackground重置为背景图，相当于画了一遍背景，因为不知道overlayImage()效率如何
+	startBackground = (600, 800, CV_8UC3, Scalar(0, 0, 0)); //将startBackground重置为背景图，相当于画了一遍背景
 	drawImage(startBackground, startBackgroundBackUp, 0, 0);
-	//imshow(windowName, startBackground);
 }
 
 void gameStart()
@@ -1004,10 +986,10 @@ static void menuOnMouse(int EVENT, int x, int y, int flags, void *userdata)
 			gameStart();*/
 		}
 	}
-	else if (460 <= x && x <= 460 + 100 && 240 <= y && y <= 240 + 50) //单人
+	else if (460 <= x && x <= 460 + 100 && 120 + 70 + 70 + 70 + 10 <= y && y <= 120 + 70 + 70 + 70 + 10 + 50) //单人
 	{
 		p->x = 460;
-		p->y = 240;
+		p->y = 120 + 70 + 70 + 70 + 10;
 		if (EVENT == EVENT_LBUTTONDOWN)
 		{
 			settings.mode = 1;
@@ -1015,10 +997,10 @@ static void menuOnMouse(int EVENT, int x, int y, int flags, void *userdata)
 			gameStart();*/
 		}
 	}
-	else if (570 <= x && x <= 570 + 100 && 240 <= y && y <= 240 + 50) //双人
+	else if (570 <= x && x <= 570 + 100 && 120 + 70 + 70 + 70 + 10 <= y && y <= 120 + 70 + 70 + 70 + 10 + 50) //双人
 	{
 		p->x = 570;
-		p->y = 240;
+		p->y = 120 + 70 + 70 + 70 + 10;
 		if (EVENT == EVENT_LBUTTONDOWN)
 		{
 			settings.mode = 2;
@@ -1026,10 +1008,10 @@ static void menuOnMouse(int EVENT, int x, int y, int flags, void *userdata)
 			gameStart();*/
 		}
 	}
-	else if (680 <= x && x <= 680 + 100 && 240 <= y && y <= 240 + 50) //AI
+	else if (680 <= x && x <= 680 + 100 && 120 + 70 + 70 + 70 + 10 <= y && y <= 120 + 70 + 70 + 70 + 10 + 50) //AI
 	{
 		p->x = 680;
-		p->y = 240;
+		p->y = 120 + 70 + 70 + 70 + 10;
 		if (EVENT == EVENT_LBUTTONDOWN)
 		{
 			settings.mode = 3;
