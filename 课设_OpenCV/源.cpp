@@ -589,8 +589,16 @@ void Menu()
 		//ÍË³ö
 		//RECT exit = { 350, 360, 350 + 100, 360 + 50 };
 		drawTransparent(startBackground, exit_b_h, exit_m, 250, 120 + 70 + 70 + 70 + 70 + 70);
-
-		circle(startBackground, p, 10, Scalar(0, 255, 255), 3);
+		switch (p.y)
+		{
+		case 120:							drawTransparent(startBackground, start_b_n, start_m, 250, 120); break;
+		case 120 + 70:						drawTransparent(startBackground, help_b_n, help_m, 250, 120 + 70); break;
+		case 120 + 70 + 70:					drawTransparent(startBackground, settings_b_n, settings_m, 250, 120 + 70 + 70); break;
+		case 120 + 70 + 70 + 70 + 70:		drawTransparent(startBackground, rank_b_n, rank_m, 250, 120 + 70 + 70 + 70 + 70); break;
+		case 120 + 70 + 70 + 70 + 70 + 70:	drawTransparent(startBackground, exit_b_n, exit_m, 250, 120 + 70 + 70 + 70 + 70 + 70); break;
+		//case 0: break;
+		}
+		//circle(startBackground, p, 10, Scalar(0, 255, 255), 3);
 		switch (settings.mode)
 		{
 		case 1:circle(startBackground, Point(460, 120 + 70 + 70 + 70 + 10), 3, Scalar(255, 255, 0), 3); break;
@@ -992,10 +1000,10 @@ static void menuOnMouse(int EVENT, int x, int y, int flags, void *userdata)
 			gameStart();
 		}
 	}
-	else if (250 <= x && x <= 250 + 300 && 180 <= y && y <= 180 + 71) //°ïÖú
+	else if (250 <= x && x <= 250 + 300 && 120 + 70 <= y && y <= 120 + 70 + 71) //°ïÖú
 	{
 		p->x = 250;
-		p->y = 180;
+		p->y = 120 + 70;
 		if (EVENT == EVENT_LBUTTONDOWN)
 		{
 			/*setMouseCallback(windowName, NULL, NULL);
