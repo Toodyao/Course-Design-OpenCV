@@ -12,10 +12,10 @@ enum TYPE {
 	CAKE,
 	BOMB
 };
-enum STATE { //ÎïÌåµÄ×´Ì¬
-	ON_SCREEN, //ÔÚÆÁÄ»ÉÏ
-	OFF_SCREEN, //Àë¿ªÁËÆÁÄ»
-	EATED // ±»Íæ¼Ò³Ôµô
+enum STATE { //物体的状态
+	ON_SCREEN, //在屏幕上
+	OFF_SCREEN, //离开了屏幕
+	EATED // 被玩家吃掉
 };
 
 enum MOUSE_POSITION {
@@ -40,41 +40,34 @@ enum MOUSE_POSITION {
 };
 
 
-struct SPEED { //TODO ÌîÐ´ËÙ¶È,ºóÆÚÉèÖÃÄÑ¶È,¿ÉÒÔ¸ÄËÙ¶È
+struct SPEED { //TODO 填写速度,后期设置难度,可以改速度
 	double player;
 	double cake;
 	double umbrella;
 	double bomb;
 };
 
-struct SPEED speed = {//³õÊ¼»¯ËÙ¶È
-	5,//player
-	1,//cake
-	4,//umbrella
-	3//bomb
-};
-
 struct PLAYER {
-	char name[10];
+	char name[10] = { '\0' }; //玩家名称
 	double x = 400;
-	double y = 480; //ºá×ø±êÊÇÒ»¸öÈ·¶¨µÄÊý
-	int score = 0; //Íæ¼Ò·ÖÊý
-	int life = 1; //Íæ¼ÒµÄÃü
+	double y = 480; //横坐标是一个确定的数
+	int score = 0; //玩家分数
+	int life = 1; //玩家的命
 };
 
 struct Settings {
-	int difficult; //ÄÑ¶È, 1¼òµ¥£¬2ÖÐµÈ£¬3À§ÄÑ
-	int mode; //Ä£Ê½ 1Îªµ¥ÈË£¬2ÎªË«ÈË£¬3ÎªAI
-	int time; //ÓÎÏ·Ê±¼ä
+	int difficult; //难度, 1简单，2中等，3困难
+	int mode; //模式 1为单人，2为双人，3为AI
+	int time; //游戏时间
 };
-//ÐÂµÄÊý¾Ý½á¹¹
+//新的数据结构
 typedef struct item_list {
 	struct ITEM *this_item;
 	struct item_list *next;
 }ItemList;
 
 typedef struct ITEM {
-	enum TYPE type; //¾ßÌåÊÇÄÄÒ»ÖÖÎïÆ·
+	enum TYPE type; //具体是哪一种物品
 	enum STATE state;
 	double x;
 	double y;
@@ -82,18 +75,19 @@ typedef struct ITEM {
 }Item;
 
 
-//È«¾Ö±äÁ¿
-//struct SPEED speed = {//³õÊ¼»¯ËÙ¶È
-//	0.5,//player
-//	0.11,//cake
-//	0.14,//umbrella
-//	0.19//bomb
-//};
+//全局变量
 
 struct item_list item_list_head;
 struct item_list *curr_list;
 
-struct Settings settings = { //Ä¬ÈÏÉèÖÃ
+struct SPEED speed = {//初始化速度
+	5,//player
+	1,//cake
+	4,//umbrella
+	3//bomb
+};
+
+struct Settings settings = { //默认设置
 	1,
 	1,
 	120
