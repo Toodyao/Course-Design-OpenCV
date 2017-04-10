@@ -90,6 +90,6 @@ struct SPEED speed = {//初始化速度
 struct Settings settings = { //默认设置
 	1,
 	1,
-	120
+	60
 };
 #endif

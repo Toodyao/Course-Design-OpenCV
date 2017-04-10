@@ -52,6 +52,7 @@ void drawPlayer(struct PLAYER *player, int direction);
 void drawPlayer2(struct PLAYER *player, int direction);
 void drawScore(int score, int score2);
 void drawPlayerName(struct PLAYER *player, struct PLAYER *player2);
+void drawTime(int time);
 int drawOver(struct PLAYER *player1, struct PLAYER *player2);
 void drawTransparent(Mat image, Mat logo, Mat mask, int x, int y);
 void drawImage(Mat image, Mat logo, int x, int y);
@@ -61,7 +62,7 @@ void Menu();
 //void changeSettings();
 int Pause(struct PLAYER *player1, struct PLAYER *player2, int *clickFlag);
 //void Help();
-//void Rank();
+void Rank();
 int returnToMenu(int *clickFlag);
 void Exit();
 void drawBackground();
@@ -69,7 +70,7 @@ void gameStart();
 
 //判断函数
 void judgeState(struct ITEM *item, struct PLAYER *player);
-int judgeOver(struct PLAYER *player1, struct PLAYER *player2);
+int judgeOver(struct PLAYER *player1, struct PLAYER *player2, int time);
 void itemMove(struct ITEM *item);
 int playerMove(struct PLAYER *player);
 int playerMove2(struct PLAYER *player);
@@ -80,6 +81,7 @@ void playerBubbleSort(struct PLAYER a[], int len);
 void Save(struct PLAYER *player);
 void showScore();
 void rewriteScore(struct PLAYER * pplayer, int lineCount);
+int countDown(clock_t start);
 
 //OpenCV 独有
 void overlayImage(Mat* src, Mat* overlay, const Point& location);
@@ -131,6 +133,12 @@ void gameFramwork()
 	Rect end(150, BORDER + 40, 70, 40);
 	rectangle(startBackground, Point(150, BORDER + 40), Point(150 + 70, BORDER + 80), Scalar(255, 255, 255));
 	putText(startBackground, String("Menu"), Point(150, BORDER + 80), CV_FONT_HERSHEY_PLAIN, 1, Scalar(255, 255, 255));
+	//时间
+	Rect time(270, BORDER + 40, 70, 40);
+	rectangle(startBackground, Point(270, BORDER + 40), Point(270 + 100, BORDER + 80), Scalar(255, 255, 255));
+	putText(startBackground, String("Time Left: "), Point(270, BORDER + 80), CV_FONT_HERSHEY_PLAIN, 1, Scalar(255, 255, 255));
+
+
 	//分数
 	//玩家1
 	Rect scoreTextAera(WIDTH - 300, BORDER + 40 - 20, 70, 20);
@@ -420,6 +428,13 @@ void drawPlayerName(struct PLAYER *player, struct PLAYER *player2)
 	}
 }
 
+void drawTime(int time)
+{
+	char a[5] = { '\n' };
+	sprintf(a, "%d", time);
+	putText(startBackground, a, Point(270, BORDER + 40), CV_FONT_HERSHEY_PLAIN, 1, Scalar(255, 255, 255));
+}
+
 int drawOver(struct PLAYER *player1, struct PLAYER *player2)
 {
 	overBackground = (600, 800, CV_8UC3, Scalar(0, 0, 0));
@@ -521,8 +536,6 @@ void Menu()
 		case 120 + 70 + 70 + 70 + 70 + 70:	drawTransparent(startBackground, exit_b_n, exit_m, 250, 120 + 70 + 70 + 70 + 70 + 70); break;
 		//case 0: break;
 		}
-		//circle(startBackground, p, 10, Scalar(0, 255, 255), 3);
-		
 
 		setMouseCallback(windowName, menuOnMouse, &p);
 		imshow(windowName, startBackground);
@@ -530,7 +543,6 @@ void Menu()
 
 	}
 
-	//EndBatchDraw();
 }
 
 int Pause(struct PLAYER *player1, struct PLAYER *player2, int *clickFlag)
@@ -545,6 +557,11 @@ int Pause(struct PLAYER *player1, struct PLAYER *player2, int *clickFlag)
 	}
 
 	return 0;
+}
+
+void Rank()
+{
+
 }
 
 int returnToMenu(int *clickFlag)
@@ -583,7 +600,7 @@ void gameStart()
 
 	struct ITEM *item;
 	initItemToZero();
-
+	clock_t startTime = clock();
 
 	/*switch (settings.mode)
 	{
@@ -627,7 +644,7 @@ void gameStart()
 				return;
 
 			judgeState(item, player1);
-			if (settings.mode != 3 && judgeOver(player1, player2))
+			if (settings.mode != 3 && judgeOver(player1, player2, countDown(startTime)))
 				return;
 			if (settings.mode == 2)
 				judgeState(item, player2);
@@ -654,6 +671,7 @@ void gameStart()
 		}
 		drawPlayerName(player1, player2);
 		drawScore(player1->score, player2->score);
+		drawTime(countDown(startTime));
 
 		imshow(windowName, startBackground);
 		waitKey(1);
@@ -680,9 +698,9 @@ void judgeState(struct ITEM *item, struct PLAYER *player)
 	}
 }
 
-int judgeOver(struct PLAYER *player1, struct PLAYER *player2)
+int judgeOver(struct PLAYER *player1, struct PLAYER *player2, int time)
 {
-	if (player1->life == 0 || player2->life == 0)
+	if (player1->life == 0 || player2->life == 0 || time == 0)
 	{
 		setMouseCallback(windowName, NULL, NULL);
 		if (drawOver(player1, player2))
@@ -890,6 +908,14 @@ void rewriteScore(struct PLAYER * pplayer, int lineCount)
 	fclose(fp);
 }
 
+int countDown(clock_t start)
+{
+	clock_t nowTime = clock();
+	int passedTime = (int)(nowTime - start) / CLOCKS_PER_SEC;
+	return settings.time - passedTime;
+}
+
+//OpenCV 独有
 void overlayImage(Mat* src, Mat* overlay, const Point& location)
 {
 	for (int y = max(location.y, 0); y < src->rows; ++y)
