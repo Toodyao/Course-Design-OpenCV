@@ -60,7 +60,7 @@ void drawImage(Mat image, Mat logo, int x, int y);
 //界面函数 //OpenCV改写
 void Menu();
 //void changeSettings();
-int Pause(struct PLAYER *player1, struct PLAYER *player2, int *clickFlag);
+clock_t Pause(struct PLAYER *player1, struct PLAYER *player2, int *clickFlag, int time);
 //void Help();
 void Rank();
 int returnToMenu(int *clickFlag);
@@ -81,7 +81,7 @@ void playerBubbleSort(struct PLAYER a[], int len);
 void Save(struct PLAYER *player);
 void showScore();
 void rewriteScore(struct PLAYER * pplayer, int lineCount);
-int countDown(clock_t start);
+int countDown(clock_t startTime, clock_t pauseTime);
 
 //OpenCV 独有
 void overlayImage(Mat* src, Mat* overlay, const Point& location);
@@ -545,18 +545,24 @@ void Menu()
 
 }
 
-int Pause(struct PLAYER *player1, struct PLAYER *player2, int *clickFlag)
+clock_t Pause(struct PLAYER *player1, struct PLAYER *player2, int *clickFlag, int time)
 {
-	while (*clickFlag)
+	clock_t pauseStartTime = clock();
+	while (*clickFlag == 1)
 	{
 		drawBackground();
 		gameFramwork();
 		putText(startBackground, String("Continue"), Point(30, BORDER + 40 + 40), CV_FONT_HERSHEY_PLAIN, 1, Scalar(255, 255, 255));
+		drawPlayerName(player1, player2);
+		drawScore(player1->score, player2->score);
+		drawTime(time);
+		//暂停图片
 		imshow(windowName, startBackground);
 		waitKey(33);
 	}
+	clock_t pauseEndTime = clock();
 
-	return 0;
+	return (pauseEndTime - pauseStartTime);
 }
 
 void Rank()
@@ -594,13 +600,17 @@ void gameStart()
 	struct PLAYER *player1 = &playerOne;
 	struct PLAYER playerTwo;
 	struct PLAYER *player2 = &playerTwo;
+	struct ITEM *item;
 	int direction = 0;
 	int direction2 = 0;
 	initPlayer(player1, player2);
-
-	struct ITEM *item;
 	initItemToZero();
-	clock_t startTime = clock();
+
+	clock_t startTime = clock(); //游戏开始的时间
+	clock_t pauseTime = 0; //暂停所经过的时间
+
+	int clickFlag = 0;
+	setMouseCallback(windowName, gameOnMouse, &clickFlag);
 
 	/*switch (settings.mode)
 	{
@@ -612,8 +622,7 @@ void gameStart()
 	break;
 	case 3:	player1->name[0] = 'A'; player1->name[1] = 'I'; player1->name[2] = '\0'; break;
 	}*/
-	int clickFlag = 0;
-	setMouseCallback(windowName, gameOnMouse, &clickFlag);
+
 	while (1)
 	{
 		for (int i = ItemNumber - ItemCount; i > 0; i--)
@@ -640,11 +649,12 @@ void gameStart()
 		item = get_first_item();
 		while (item != NULL)
 		{
-			if (returnToMenu(&clickFlag) || Pause(player1, player2, &clickFlag))
+			if (returnToMenu(&clickFlag))
 				return;
+			pauseTime += Pause(player1, player2, &clickFlag, countDown(startTime, pauseTime));
 
 			judgeState(item, player1);
-			if (settings.mode != 3 && judgeOver(player1, player2, countDown(startTime)))
+			if (settings.mode != 3 && judgeOver(player1, player2, countDown(startTime, pauseTime)))
 				return;
 			if (settings.mode == 2)
 				judgeState(item, player2);
@@ -671,7 +681,7 @@ void gameStart()
 		}
 		drawPlayerName(player1, player2);
 		drawScore(player1->score, player2->score);
-		drawTime(countDown(startTime));
+		drawTime(countDown(startTime, pauseTime));
 
 		imshow(windowName, startBackground);
 		waitKey(1);
@@ -808,7 +818,6 @@ int AIMove(struct PLAYER *player, struct ITEM *item)
 }
 
 //其他函数
-
 void playerBubbleSort(struct PLAYER a[], int len)
 {
 	struct PLAYER temp;
@@ -908,10 +917,10 @@ void rewriteScore(struct PLAYER * pplayer, int lineCount)
 	fclose(fp);
 }
 
-int countDown(clock_t start)
+int countDown(clock_t startTime, clock_t pauseTime)
 {
 	clock_t nowTime = clock();
-	int passedTime = (int)(nowTime - start) / CLOCKS_PER_SEC;
+	int passedTime = (int)(nowTime - startTime - pauseTime) / CLOCKS_PER_SEC;
 	return settings.time - passedTime;
 }
 
