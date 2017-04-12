@@ -346,14 +346,17 @@ void drawItem(struct ITEM *item)
 	{
 	case UMBRELLA:
 		//TODO È¡ÏûÁË-20
+		circle(startBackground, Point((int)item->x, (int)item->y), 20, Scalar(255, 255, 255));
 		drawTransparent(startBackground, img_umbrella, umbrella_m, (int)item->x, (int)item->y);
 
 		break;
 	case CAKE:
+		circle(startBackground, Point((int)item->x, (int)item->y), 20, Scalar(255, 255, 255));
 		drawTransparent(startBackground, img_cake, cake_m, (int)item->x, (int)item->y);
 
 		break;
 	case BOMB:
+		circle(startBackground, Point((int)item->x, (int)item->y), 20, Scalar(255, 255, 255));
 		drawTransparent(startBackground, img_bomb, bomb_m, (int)item->x, (int)item->y);
 
 		break;
@@ -386,6 +389,7 @@ void drawPlayer(struct PLAYER *player, int direction)
 	case LEFT: flag = -1; break;
 	case RIGHT: flag = 1; break;
 	}*/
+	circle(startBackground, Point((int)player->x - 20, (int)player->y - 20), 20, Scalar(255, 255, 255));
 	drawTransparent(startBackground, img_player, player_m, (int)player->x - 20, (int)player->y - 20);
 }
 
@@ -737,14 +741,14 @@ int playerMove(struct PLAYER *player)
 	if (/*c == 'a'*/GetAsyncKeyState(0x41))
 	{
 		player->x -= speed.player;
-		if (player->x <= 0 + speed.player || player->x >= WIDTH - speed.player) //±ß½ç¼ì²â
+		if (player->x <= 0 + speed.player + 10 || player->x >= WIDTH - speed.player - 40) //±ß½ç¼ì²â
 			player->x += speed.player;
 		return LEFT;
 	}
 	if (/*c == 'd'*/GetAsyncKeyState(0x44))
 	{
 		player->x += speed.player;
-		if (player->x <= 0 + speed.player || player->x >= WIDTH - speed.player)
+		if (player->x <= 0 + speed.player + 10 || player->x >= WIDTH - speed.player - 40)
 			player->x -= speed.player;
 		return RIGHT;
 	}
@@ -758,14 +762,14 @@ int playerMove2(struct PLAYER *player)
 	if (/*c == 'j'*/GetAsyncKeyState(VK_LEFT))
 	{
 		player->x -= speed.player;
-		if (player->x <= 0 + speed.player || player->x >= WIDTH - speed.player) //±ß½ç¼ì²â
+		if (player->x <= 0 + speed.player + 10 || player->x >= WIDTH - speed.player - 40) //±ß½ç¼ì²â
 			player->x += speed.player;
 		return LEFT;
 	}
 	if (/*c == 'l'*/GetAsyncKeyState(VK_RIGHT))
 	{
 		player->x += speed.player;
-		if (player->x <= 0 + speed.player || player->x >= WIDTH - speed.player)
+		if (player->x <= 0 + speed.player + 10 || player->x >= WIDTH - speed.player - 40)
 			player->x -= speed.player;
 		return RIGHT;
 	}
