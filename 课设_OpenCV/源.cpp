@@ -82,6 +82,7 @@ void Save(struct PLAYER *player);
 void showScore();
 void rewriteScore(struct PLAYER * pplayer, int lineCount);
 int countDown(clock_t startTime, clock_t pauseTime);
+enum TYPE randomType();
 
 //OpenCV 独有
 void overlayImage(Mat* src, Mat* overlay, const Point& location);
@@ -93,9 +94,10 @@ static void overOnMouse(int EVENT, int x, int y, int flags, void *userdata);
 int ItemCount = 0;
 const int ItemNumber = 10;//屏幕上物品的总数
 
-Mat allBackground(600, 800, CV_8UC3, Scalar(0, 0, 0)), startBackground(600, 800, CV_8UC3, Scalar(0, 0, 0)), startBackgroundBackUp, overBackground(600, 800, CV_8UC3, Scalar(0, 0, 0)), start_b_h, start_b_n, help_b_h, help_b_n, mode_b_h, mode_b_n, settings_b_h, settings_b_n, rank_b_h, rank_b_n, exit_b_h, exit_b_n, single, single_n, select_;
+Mat allBackground(600, 800, CV_8UC3, Scalar(0, 0, 0)), startBackground(600, 800, CV_8UC3, Scalar(0, 0, 0)), startBackgroundBackUp, overBackground(600, 800, CV_8UC3, Scalar(0, 0, 0));
+Mat start_b_h, start_b_n, help_b_h, help_b_n, mode_b_h, mode_b_n, settings_b_h, settings_b_n, rank_b_h, rank_b_n, exit_b_h, exit_b_n, single, single_n, select_;
 Mat start_m, help_m, mode_m, settings_m, rank_m, exit_m, single_m, select_m;
-Mat img_player, img_umbrella, img_bomb, img_cake, player_m, umbrella_m, bomb_m, cake_m;
+Mat img_player, img_playerR, img_playerS, img_player2, img_player2R, img_player2S, player_m, playerR_m, playerS_m, img_umbrella, img_bomb, img_cake, umbrella_m, bomb_m, cake_m;
 const String windowName("测试");
 
 int main()
@@ -183,7 +185,6 @@ void initItemToZero()
 		item->state = ON_SCREEN;
 		item->x = 200 + rand() % 400;
 		item->y = 0;
-		//item->y = -(rand() % 550);
 		item = get_next_item();
 	}
 }
@@ -191,29 +192,7 @@ void initItemToZero()
 void loadAllImages()
 {
 	startBackground = (600, 800, CV_8UC3, Scalar(0, 0, 0));
-	/*
-	startBackgroundBackUp = imread("img\\bkg.png");
-	start_b_h = imread("img\\buttons\\start_h.png");
-	start_b_n = imread("img\\buttons\\start_n.png");
-	help_b_h = imread("img\\buttons\\help_h.png");
-	help_b_n = imread("img\\buttons\\help_n.png");
-	mode_b_h = imread("img\\buttons\\mode_h.png");
-	mode_b_n = imread("img\\buttons\\mode_n.png");
-	settings_b_h = imread("img\\buttons\\settings_h.png");
-	settings_b_n = imread("img\\buttons\\settings_n.png");
-	rank_b_h = imread("img\\buttons\\rank_h.png");
-	rank_b_n = imread("img\\buttons\\rank_n.png");
-	exit_b_h = imread("img\\buttons\\exit_h.png");
-	exit_b_n = imread("img\\buttons\\exit_n.png");
-	img_player = imread("img\\main\\player.bmp");
-	img_umbrella = imread("img\\main\\umbrella.bmp");
-	img_bomb = imread("img\\main\\bomb.bmp");
-	img_cake = imread("img\\main\\cake.bmp");
-	player_m = imread("img\\main\\player_b.bmp");
-	umbrella_m = imread("img\\main\\umbrella_b.bmp");
-	bomb_m = imread("img\\main\\bomb_b.bmp");
-	cake_m = imread("img\\main\\cake_b.bmp");
-	*/
+	
 	startBackgroundBackUp = imread("img/bkg.png");
 	start_b_h = imread("img/buttons/start_h.bmp");
 	start_b_n = imread("img/buttons/start_n.bmp");
@@ -238,10 +217,18 @@ void loadAllImages()
 	select_m = imread("img/buttons/select_m.bmp");
 
 	img_player = imread("img/main/player.bmp");
+	img_playerR = imread("img/main/playerR.bmp");
+	img_playerS = imread("img/main/playerS.bmp");
+	img_player2 = imread("img/main/player2.bmp");
+	img_player2R = imread("img/main/player2R.bmp");
+	img_player2S = imread("img/main/player2S.bmp");
 	img_umbrella = imread("img/main/umbrella.bmp");
+	player_m = imread("img/main/player_m.bmp");
+	playerR_m = imread("img/main/playerR_m.bmp");
+	playerS_m = imread("img/main/playerS_m.bmp");
+
 	img_bomb = imread("img/main/bomb.bmp");
 	img_cake = imread("img/main/cake.bmp");
-	player_m = imread("img/main/player_m.bmp");
 	umbrella_m = imread("img/main/umbrella_m.bmp");
 	bomb_m = imread("img/main/bomb_m.bmp");
 	cake_m = imread("img/main/cake_m.bmp");
@@ -260,21 +247,10 @@ void addItem()//把new和add函数合成一个函数了
 {
 	//先创建小节点
 	Item *newItem = (Item *)malloc(sizeof(Item));
-	//srand((unsigned int)time(0));
-	int randomNumber = rand() % 3;
-	// TODO 以下写到函数randomType()里，返回值为enum，加概率
-	switch (randomNumber)
-	{
-	case 0:newItem->type = UMBRELLA; break;
-	case 1:newItem->type = CAKE; break;
-	case 2:newItem->type = BOMB; break;
-	}
-	////
+	newItem->type = randomType();
 	newItem->state = ON_SCREEN;
 	newItem->x = 200 + rand() % 400;
 	newItem->y = 0;
-	//newItem->y = -(rand() % 550);
-	//	newItem->next = NULL;
 	//创建大节点
 	struct item_list *list_tail = &item_list_head;
 	while (list_tail->next != NULL)
@@ -346,17 +322,17 @@ void drawItem(struct ITEM *item)
 	{
 	case UMBRELLA:
 		//TODO 取消了-20
-		circle(startBackground, Point((int)item->x, (int)item->y), 20, Scalar(255, 255, 255));
+		//circle(startBackground, Point((int)item->x, (int)item->y), 20, Scalar(255, 255, 255));
 		drawTransparent(startBackground, img_umbrella, umbrella_m, (int)item->x, (int)item->y);
 
 		break;
 	case CAKE:
-		circle(startBackground, Point((int)item->x, (int)item->y), 20, Scalar(255, 255, 255));
+		//circle(startBackground, Point((int)item->x, (int)item->y), 20, Scalar(255, 255, 255));
 		drawTransparent(startBackground, img_cake, cake_m, (int)item->x, (int)item->y);
 
 		break;
 	case BOMB:
-		circle(startBackground, Point((int)item->x, (int)item->y), 20, Scalar(255, 255, 255));
+		//circle(startBackground, Point((int)item->x, (int)item->y), 20, Scalar(255, 255, 255));
 		drawTransparent(startBackground, img_bomb, bomb_m, (int)item->x, (int)item->y);
 
 		break;
@@ -382,27 +358,22 @@ void coverItem(int x, int y, enum TYPE type)
 
 void drawPlayer(struct PLAYER *player, int direction)
 {
-	// TODO 待修改
-	/*int flag = 0;
 	switch (direction)
 	{
-	case LEFT: flag = -1; break;
-	case RIGHT: flag = 1; break;
-	}*/
-	circle(startBackground, Point((int)player->x - 20, (int)player->y - 20), 20, Scalar(255, 255, 255));
-	drawTransparent(startBackground, img_player, player_m, (int)player->x - 20, (int)player->y - 20);
+	case LEFT:	drawTransparent(startBackground, img_player, player_m, (int)player->x - 20, (int)player->y - 20);	break;
+	case RIGHT: drawTransparent(startBackground, img_playerR, playerR_m, (int)player->x - 20, (int)player->y - 20); break;
+	default:	drawTransparent(startBackground, img_playerS, playerS_m, (int)player->x - 20, (int)player->y - 20); break;
+	}
 }
 
 void drawPlayer2(struct PLAYER *player, int direction)
 {
-	// TODO 待修改
-	/*int flag = 0;
 	switch (direction)
 	{
-	case LEFT: flag = -1; break;
-	case RIGHT: flag = 1; break;
-	}*/
-	drawTransparent(startBackground, img_player, player_m, (int)player->x - 20, (int)player->y - 20);
+	case LEFT:	drawTransparent(startBackground, img_player2, player_m, (int)player->x - 20, (int)player->y - 20);	break;
+	case RIGHT: drawTransparent(startBackground, img_player2R, playerR_m, (int)player->x - 20, (int)player->y - 20); break;
+	default:	drawTransparent(startBackground, img_player2S, playerS_m, (int)player->x - 20, (int)player->y - 20); break;
+	}
 }
 
 void drawScore(int score, int score2)
@@ -489,7 +460,6 @@ void Menu()
 	while (1)
 	{
 		drawBackground();
-		//TODO 需要
 
 		//开始
 		Rect start(350, 120, 100, 50);
@@ -506,7 +476,7 @@ void Menu()
 		switch (settings.mode)
 		{
 		case 1:drawTransparent(startBackground, select_, select_m, 460, 120 + 70 + 70 + 70 + 10); break;
-		case 2:drawTransparent(startBackground, select_, select_m, 570, 120 + 70 + 70 + 70 + 10);  break;
+		case 2:drawTransparent(startBackground, select_, select_m, 570, 120 + 70 + 70 + 70 + 10); break;
 		case 3:drawTransparent(startBackground, select_, select_m, 680, 120 + 70 + 70 + 70 + 10); break;
 		}
 
@@ -596,9 +566,8 @@ void drawBackground()
 
 void gameStart()
 {
-	//cleardevice();
 	// 数据初始化
-	srand((unsigned int)time(0));
+	srand((unsigned int)time(NULL));
 
 	struct PLAYER playerOne;
 	struct PLAYER *player1 = &playerOne;
@@ -675,14 +644,13 @@ void gameStart()
 				itemMove(item);
 				//AI移动
 				if (settings.mode == 3)
-				{
 					direction = AIMove(player1, item);
-					drawPlayer(player1, direction);
-				}
 				drawItem(item);
 			}
 			item = get_next_item();
 		}
+		if (settings.mode == 3)
+			drawPlayer(player1, direction);
 		drawPlayerName(player1, player2);
 		drawScore(player1->score, player2->score);
 		drawTime(countDown(startTime, pauseTime));
@@ -759,14 +727,14 @@ int playerMove2(struct PLAYER *player)
 {
 	int key = 0;
 	char c = cvWaitKey(1);
-	if (/*c == 'j'*/GetAsyncKeyState(VK_LEFT))
+	if (/*c == 'j'*/GetAsyncKeyState(0x4A))
 	{
 		player->x -= speed.player;
 		if (player->x <= 0 + speed.player + 10 || player->x >= WIDTH - speed.player - 40) //边界检测
 			player->x += speed.player;
 		return LEFT;
 	}
-	if (/*c == 'l'*/GetAsyncKeyState(VK_RIGHT))
+	if (/*c == 'l'*/GetAsyncKeyState(0x4C))
 	{
 		player->x += speed.player;
 		if (player->x <= 0 + speed.player + 10 || player->x >= WIDTH - speed.player - 40)
@@ -786,7 +754,7 @@ int AIMove(struct PLAYER *player, struct ITEM *item)
 			if (((item->x - 20) <= (player->x + 20)) && ((player->x + 20) <= item->x) && ((item->x - 20) - (player->x + 20)) <= 50 || player->x == item->x)
 			{
 				player->x -= speed.player;
-				if (player->x <= 0 + speed.player || player->x >= WIDTH - speed.player) //边界检测
+				if (player->x <= 0 + speed.player + 10 || player->x >= WIDTH - speed.player - 40) //边界检测
 					player->x += speed.player;
 				return LEFT;
 			}
@@ -794,7 +762,7 @@ int AIMove(struct PLAYER *player, struct ITEM *item)
 			if (((player->x - 20) >= item->x) && ((player->x - 20) <= (item->x + 20)))
 			{
 				player->x += speed.player;
-				if (player->x <= 0 + speed.player || player->x >= WIDTH - speed.player)
+				if (player->x <= 0 + speed.player + 10 || player->x >= WIDTH - speed.player - 40)
 					player->x -= speed.player;
 				return RIGHT;
 			}
@@ -804,14 +772,14 @@ int AIMove(struct PLAYER *player, struct ITEM *item)
 			if (((item->x - 20) - (player->x + 20)) > 0)
 			{
 				player->x += speed.player;
-				if (player->x <= 0 + speed.player || player->x >= WIDTH - speed.player) //边界检测
+				if (player->x <= 0 + speed.player + 10 || player->x >= WIDTH - speed.player - 40) //边界检测
 					player->x -= speed.player;
 				return RIGHT;
 			}
 			if (((player->x - 20) - (item->x + 20)) > 0)
 			{
 				player->x -= speed.player;
-				if (player->x <= 0 + speed.player || player->x >= WIDTH - speed.player)
+				if (player->x <= 0 + speed.player + 10 || player->x >= WIDTH - speed.player - 40)
 					player->x += speed.player;
 				return LEFT;
 			}
@@ -928,6 +896,20 @@ int countDown(clock_t startTime, clock_t pauseTime)
 	return settings.time - passedTime;
 }
 
+enum TYPE randomType()
+{
+	int randomNumber = rand() % 100;
+	if (settings.mode == 1)
+	{
+		if (randomNumber <= 15)
+			return BOMB;
+		else if (randomNumber <= 50)
+			return UMBRELLA;
+		else
+			return CAKE;
+	}
+}
+
 //OpenCV 独有
 void overlayImage(Mat* src, Mat* overlay, const Point& location)
 {
@@ -1010,8 +992,6 @@ static void menuOnMouse(int EVENT, int x, int y, int flags, void *userdata)
 		if (EVENT == EVENT_LBUTTONDOWN)
 		{
 			settings.mode = 1;
-			/*setMouseCallback(windowName, NULL, NULL);
-			gameStart();*/
 		}
 	}
 	else if (570 <= x && x <= 570 + 100 && 120 + 70 + 70 + 70 + 10 <= y && y <= 120 + 70 + 70 + 70 + 10 + 50) //双人
@@ -1021,8 +1001,6 @@ static void menuOnMouse(int EVENT, int x, int y, int flags, void *userdata)
 		if (EVENT == EVENT_LBUTTONDOWN)
 		{
 			settings.mode = 2;
-			/*setMouseCallback(windowName, NULL, NULL);
-			gameStart();*/
 		}
 	}
 	else if (680 <= x && x <= 680 + 100 && 120 + 70 + 70 + 70 + 10 <= y && y <= 120 + 70 + 70 + 70 + 10 + 50) //AI
@@ -1032,9 +1010,7 @@ static void menuOnMouse(int EVENT, int x, int y, int flags, void *userdata)
 		if (EVENT == EVENT_LBUTTONDOWN)
 		{
 			settings.mode = 3;
-			circle(startBackground, Point(680, 240), 10, Scalar(255, 255, 255), 3);
-			/*setMouseCallback(windowName, NULL, NULL);
-			gameStart();*/
+			//circle(startBackground, Point(680, 240), 10, Scalar(255, 255, 255), 3);
 		}
 	}
 	else if (250 <= x && x <= 250 + 300 && 120 + 70 + 70 + 70 + 70 <= y && y <= 120 + 70 + 70 + 70 + 70 + 71) //排名
