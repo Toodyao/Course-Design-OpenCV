@@ -91,11 +91,11 @@ static void returnOnMouse(int EVENT, int x, int y, int flags, void *userdata);
 int ItemCount = 0;
 const int ItemNumber = 10;//屏幕上物品的总数
 
-Mat allBackground(600, 800, CV_8UC3, Scalar(0, 0, 0)), startBackground(600, 800, CV_8UC3, Scalar(0, 0, 0)), startBackgroundBackUp, overBackground(600, 800, CV_8UC3, Scalar(0, 0, 0)), rankBackground(600, 800, CV_8UC3, Scalar(255, 255, 255)), helpBackground(600, 800, CV_8UC3, Scalar(255, 255, 255)), enterBackground(600, 800, CV_8UC3, Scalar(255, 255, 255)), whitebkg;
+Mat allBackground(600, 800, CV_8UC3, Scalar(0, 0, 0)), startBackground(600, 800, CV_8UC3, Scalar(0, 0, 0)), startBackgroundBackUp, overBackground(600, 800, CV_8UC3, Scalar(0, 0, 0)), rankBackground(600, 800, CV_8UC3, Scalar(255, 255, 255)), helpBackground(600, 800, CV_8UC3, Scalar(255, 255, 255)), enterBackground(600, 800, CV_8UC3, Scalar(255, 255, 255)), title, title_m;
 Mat start_b_h, start_b_n, help_b_h, help_b_n, mode_b_h, mode_b_n, settings_b_h, settings_b_n, rank_b_h, rank_b_n, exit_b_h, exit_b_n, single, single_n, select_, back_b, back_b_m, gstart, gstart_m, gpause, gpause_m;
 Mat start_m, help_m, mode_m, settings_m, rank_m, exit_m, single_m, select_m, first;
 Mat img_player, img_playerR, img_playerS, img_player2, img_player2R, img_player2S, player_m, playerR_m, playerS_m, img_umbrella, img_bomb, img_cake, img_explode, umbrella_m, bomb_m, cake_m, explode_m;
-const String windowName("测试");
+const String windowName("躲避横祸");
 
 int main()
 {
@@ -189,7 +189,8 @@ void loadAllImages()
 	startBackground = (600, 800, CV_8UC3, Scalar(0, 0, 0));
 	overBackground = imread("img/over.bmp");
 	helpBackground = imread("img/help.jpg");
-	whitebkg = imread("img/white.jpg");
+	title = imread("img/title.bmp");
+	title_m = imread("img/title_m.bmp");
 	//rankBackground = imread("img/rankbackground.bmp");
 	startBackgroundBackUp = imread("img/bkg.png");
 	start_b_h = imread("img/buttons/start_h.bmp");
@@ -486,7 +487,7 @@ void Menu()
 	while (1)
 	{
 		drawBackground();
-
+		drawTransparent(startBackground, title, title_m, 200, 25);
 		//开始
 		Rect start(350, 120, 100, 50);
 		drawTransparent(startBackground, start_b_h, start_m, 250, 120);
