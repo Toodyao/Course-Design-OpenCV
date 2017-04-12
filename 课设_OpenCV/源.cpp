@@ -82,9 +82,7 @@ void rewriteScore(struct PLAYER * pplayer, int lineCount);
 int countDown(clock_t startTime, clock_t pauseTime);
 enum TYPE randomType();
 
-//OpenCV 独有
-void overlayImage(Mat* src, Mat* overlay, const Point& location);
-void Move();
+//OpenCV鼠标回调函数
 static void menuOnMouse(int EVENT, int x, int y, int flags, void *userdata);
 static void gameOnMouse(int EVENT, int x, int y, int flags, void *userdata);
 static void overOnMouse(int EVENT, int x, int y, int flags, void *userdata);
@@ -126,41 +124,38 @@ void gameFramwork()
 {
 	//界面初始化
 	line(startBackground, Point(0, BORDER), Point(WIDTH, BORDER), Scalar(255, 255, 255));
+
 	//开始按钮
 	drawTransparent(startBackground, gpause, gpause_m, 30, BORDER + 40);
-	/*Rect start(30, BORDER + 40, 70, 40);
-	rectangle(startBackground, Point(30, BORDER + 40), Point(100, BORDER + 80), Scalar(255, 255, 255));
-	putText(startBackground, String("Pause"), Point(30, BORDER + 40 + 40), CV_FONT_HERSHEY_PLAIN, 1, Scalar(255, 255, 255));*/
+
 	//结束按钮
 	Rect end(150, BORDER + 40, 70, 40);
 	rectangle(startBackground, Point(150, BORDER + 40), Point(150 + 70, BORDER + 80), Scalar(255, 255, 255));
-	putText(startBackground, String("Menu"), Point(150, BORDER + 80), CV_FONT_HERSHEY_PLAIN, 1, Scalar(255, 255, 255));
+	putText(startBackground, String("Menu"), Point(150 + 10, BORDER + 80 - 15), CV_FONT_HERSHEY_PLAIN, 1, Scalar(255, 255, 255));
+
 	//时间
 	Rect time(270, BORDER + 40, 70, 40);
-	rectangle(startBackground, Point(270, BORDER + 40), Point(270 + 100, BORDER + 80), Scalar(255, 255, 255));
-	putText(startBackground, String("Time Left: "), Point(270, BORDER + 80), CV_FONT_HERSHEY_PLAIN, 1, Scalar(255, 255, 255));
-
+	rectangle(startBackground, Point(270, BORDER + 40), Point(270 + 100, BORDER + 80 + 20), Scalar(255, 255, 255));
+	putText(startBackground, String("Time Left: "), Point(270 + 10, BORDER + 80 - 20), CV_FONT_HERSHEY_PLAIN, 1, Scalar(255, 255, 255));
 
 	//分数
 	//玩家1
 	Rect scoreTextAera(WIDTH - 300, BORDER + 40 - 20, 70, 20);
 	Rect playerNameAera(WIDTH - 300, BORDER + 80 - 20, 70, 20);
-	rectangle(startBackground, Point(WIDTH - 300, BORDER + 40 - 20), Point(WIDTH - 180, BORDER + 80 - 20), Scalar(255, 255, 255));
-	rectangle(startBackground, Point(WIDTH - 300, BORDER + 80 - 20), Point(WIDTH - 180, BORDER + 120 - 20), Scalar(255, 255, 255));
+	rectangle(startBackground, Point(WIDTH - 300, BORDER + 40 - 20), Point(WIDTH - 180 + 25, BORDER + 80 - 20), Scalar(255, 255, 255));
+	rectangle(startBackground, Point(WIDTH - 300, BORDER + 80 - 20), Point(WIDTH - 180 + 25, BORDER + 120 - 20), Scalar(255, 255, 255));
 
-	putText(startBackground, String("Score:"), Point(WIDTH - 300, BORDER + 80 - 20), CV_FONT_HERSHEY_PLAIN, 1, Scalar(255, 255, 255));
-	putText(startBackground, String("Player1:"), Point(WIDTH - 300, BORDER + 120 - 20), CV_FONT_HERSHEY_PLAIN, 1, Scalar(255, 255, 255));
+	putText(startBackground, String("Score:"), Point(WIDTH - 300 + 5, BORDER + 80 - 20 - 10), CV_FONT_HERSHEY_PLAIN, 1, Scalar(255, 255, 255));
+	putText(startBackground, String("Player1:"), Point(WIDTH - 300 + 5, BORDER + 120 - 20 - 10), CV_FONT_HERSHEY_PLAIN, 1, Scalar(255, 255, 255));
 
 	//玩家2
 	if (settings.mode == 2)
 	{
-		//RECT scoreTextAera2 = { WIDTH - 180, BORDER + 40 - 20, WIDTH - 110, BORDER + 80 - 20 };
-		//RECT playerNameAera2 = { WIDTH - 180, BORDER + 80 - 20, WIDTH - 110, BORDER + 120 - 20 };
-		rectangle(startBackground, Point(WIDTH - 180, BORDER + 40 - 20), Point(WIDTH - 60, BORDER + 80 - 20), Scalar(255, 255, 255));
-		rectangle(startBackground, Point(WIDTH - 180, BORDER + 80 - 20), Point(WIDTH - 60, BORDER + 120 - 20), Scalar(255, 255, 255));
+		rectangle(startBackground, Point(WIDTH - 180 + 25, BORDER + 40 - 20), Point(WIDTH - 60 + 40 + 10, BORDER + 80 - 20), Scalar(255, 255, 255));
+		rectangle(startBackground, Point(WIDTH - 180 + 25, BORDER + 80 - 20), Point(WIDTH - 60 + 40 + 10, BORDER + 120 - 20), Scalar(255, 255, 255));
 
-		putText(startBackground, String("Score:"), Point(WIDTH - 180, BORDER + 80 - 20), CV_FONT_HERSHEY_PLAIN, 1, Scalar(255, 255, 255));
-		putText(startBackground, String("Player2:"), Point(WIDTH - 180, BORDER + 120 - 20), CV_FONT_HERSHEY_PLAIN, 1, Scalar(255, 255, 255));
+		putText(startBackground, String("Score:"), Point(WIDTH - 180 + 30, BORDER + 80 - 20 - 10), CV_FONT_HERSHEY_PLAIN, 1, Scalar(255, 255, 255));
+		putText(startBackground, String("Player2:"), Point(WIDTH - 180 + 30, BORDER + 120 - 20 - 10), CV_FONT_HERSHEY_PLAIN, 1, Scalar(255, 255, 255));
 	}
 }
 
@@ -359,11 +354,6 @@ struct ITEM *get_next_item()
 {
 	if (curr_list == NULL || curr_list->next == NULL)
 		return NULL;
-	/*if (curr_list->next == (item_list *)0xdddddddd)
-	{
-	curr_list->next = NULL;
-	return NULL;
-	}*/
 	curr_list = curr_list->next;
 	return curr_list->this_item;
 }
@@ -374,15 +364,12 @@ void drawItem(struct ITEM *item)
 	switch (item->type)
 	{
 	case UMBRELLA:
-		//circle(startBackground, Point((int)item->x, (int)item->y), 20, Scalar(255, 255, 255));
 		drawTransparent(startBackground, img_umbrella, umbrella_m, (int)item->x, (int)item->y);
 		break;
 	case CAKE:
-		//circle(startBackground, Point((int)item->x, (int)item->y), 20, Scalar(255, 255, 255));
 		drawTransparent(startBackground, img_cake, cake_m, (int)item->x, (int)item->y);
 		break;
 	case BOMB:
-		//circle(startBackground, Point((int)item->x, (int)item->y), 20, Scalar(255, 255, 255));
 		drawTransparent(startBackground, img_bomb, bomb_m, (int)item->x, (int)item->y);
 		break;
 	}
@@ -418,25 +405,24 @@ void drawScore(int score, int score2)
 {
 	char scoreNumber[10];
 	sprintf(scoreNumber, "%d", score);
-	putText(startBackground, scoreNumber, Point(WIDTH - 240, BORDER + 80 - 20), CV_FONT_HERSHEY_PLAIN, 1, Scalar(255, 255, 255));
+	putText(startBackground, scoreNumber, Point(WIDTH - 240 + 10, BORDER + 80 - 20 - 10), CV_FONT_HERSHEY_PLAIN, 1, Scalar(255, 255, 255));
 	//玩家2
 	if (settings.mode == 2)
 	{
 		char scoreNumber2[10];
 		sprintf(scoreNumber2, "%d", score2);
-		putText(startBackground, scoreNumber2, Point(WIDTH - 120, BORDER + 80 - 20), CV_FONT_HERSHEY_PLAIN, 1, Scalar(255, 255, 255));
-		//RECT scoreNumberAera2 = { WIDTH - 180, BORDER + 40 - 20, WIDTH - 30, BORDER + 80 - 20 };
+		putText(startBackground, scoreNumber2, Point(WIDTH - 120 + 10 + 20, BORDER + 80 - 20 - 10), CV_FONT_HERSHEY_PLAIN, 1, Scalar(255, 255, 255));
 	}
 }
 
 void drawPlayerName(struct PLAYER *player, struct PLAYER *player2)
 {
 	//玩家1或AI
-	putText(startBackground, player->name, Point(WIDTH - 230, BORDER + 120 - 20), CV_FONT_HERSHEY_PLAIN, 1, Scalar(255, 255, 255));
+	putText(startBackground, player->name, Point(WIDTH - 230, BORDER + 120 - 20 - 10), CV_FONT_HERSHEY_PLAIN, 1, Scalar(255, 255, 255));
 
 	//玩家2	
 	if (settings.mode == 2)
-		putText(startBackground, player->name, Point(WIDTH - 120, BORDER + 120 - 20), CV_FONT_HERSHEY_PLAIN, 1, Scalar(255, 255, 255));
+		putText(startBackground, player->name, Point(WIDTH - 120 + 40, BORDER + 120 - 20 - 10), CV_FONT_HERSHEY_PLAIN, 1, Scalar(255, 255, 255));
 }
 
 void drawTime(int time)
@@ -444,9 +430,9 @@ void drawTime(int time)
 	char a[5] = { '\n' };
 	sprintf(a, "%d", time);
 	if(time <= 10)
-		putText(startBackground, a, Point(270, BORDER + 40), CV_FONT_HERSHEY_PLAIN, 1.5, Scalar(0, 0, 255), 2);
+		putText(startBackground, a, Point(270 + 40, BORDER + 40 + 50), CV_FONT_HERSHEY_PLAIN, 1.5, Scalar(0, 0, 255), 2);
 	else
-		putText(startBackground, a, Point(270, BORDER + 40), CV_FONT_HERSHEY_PLAIN, 1, Scalar(255, 255, 255));
+		putText(startBackground, a, Point(270 + 40, BORDER + 40 + 50), CV_FONT_HERSHEY_PLAIN, 1.1, Scalar(255, 255, 255));
 }
 
 int drawOver(struct PLAYER *player1, struct PLAYER *player2)
@@ -510,7 +496,6 @@ void Menu()
 		drawTransparent(startBackground, help_b_h, help_m, 250, 120 + 70);
 
 		//设置/模式
-		//RECT mode = { 350, 240, 350 + 100, 240 + 50 };
 		drawTransparent(startBackground, settings_b_h, settings_m, 250, 120 + 70 + 70);
 
 		switch (settings.difficult)
@@ -556,11 +541,9 @@ void Menu()
 		putText(startBackground, String("Easy"), Point(400 - 280 - 100, 120 + 70 + 70 + 70 + 10 + 30), CV_FONT_HERSHEY_PLAIN, 1.2, Scalar(255, 255, 255));
 
 		//排名
-		//RECT rank = { 350, 300, 350 + 100, 300 + 50 };
 		drawTransparent(startBackground, rank_b_h, rank_m, 250, 120 + 70 + 70 + 70 + 70);
 
 		//退出
-		//RECT exit = { 350, 360, 350 + 100, 360 + 50 };
 		drawTransparent(startBackground, exit_b_h, exit_m, 250, 120 + 70 + 70 + 70 + 70 + 70);
 		switch (p.y)
 		{
@@ -649,7 +632,6 @@ void drawBackground()
 {
 	startBackground = (600, 800, CV_8UC3, Scalar(0, 0, 0)); //将startBackground重置为背景图，相当于画了一遍背景，因为不知道overlayImage()效率如何
 	drawImage(startBackground, startBackgroundBackUp, 0, 0);
-	//imshow(windowName, startBackground);
 }
 
 void gameStart()
@@ -721,9 +703,7 @@ void gameStart()
 			enum TYPE temp_type = item->type;
 
 			if (delItem())
-			{
 				coverItem(temp_x, temp_y, temp_type);
-			}
 			else {
 				itemMove(item);
 				//AI移动
@@ -965,9 +945,7 @@ void rewriteScore(struct PLAYER * pplayer, int lineCount)
 	}
 
 	for (int i = 0; i < lineCount; i++)
-	{
 		fwrite(&pplayer[i], sizeof(struct PLAYER), 1, fp);
-	}
 
 	fclose(fp);
 }
@@ -1012,47 +990,7 @@ enum TYPE randomType()
 	return CAKE;
 }
 
-//OpenCV 独有
-void overlayImage(Mat* src, Mat* overlay, const Point& location)
-{
-	for (int y = max(location.y, 0); y < src->rows; ++y)
-	{
-		int fY = y - location.y;
-
-		if (fY >= overlay->rows)
-			break;
-
-		for (int x = max(location.x, 0); x < src->cols; ++x)
-		{
-			int fX = x - location.x;
-
-			if (fX >= overlay->cols)
-				break;
-
-			double opacity = ((double)overlay->data[fY * overlay->step + fX * overlay->channels() + 3]) / 255;
-
-			for (int c = 0; opacity > 0 && c < src->channels(); ++c)
-			{
-				unsigned char overlayPx = overlay->data[fY * overlay->step + fX * overlay->channels() + c];
-				unsigned char srcPx = src->data[y * src->step + x * src->channels() + c];
-				src->data[y * src->step + src->channels() * x + c] = srcPx * (1. - opacity) + overlayPx * opacity;
-			}
-		}
-	}
-}
-
-void Move()
-{
-	for (int i = 0; i < 70; i += 1)
-	{
-		overlayImage(&startBackground, &startBackgroundBackUp, Point(0, 0));
-		//overlayImage(&startBackground, &exit_b_n, Point(250, 120 + 70 + 70 + 70 + 70 + i));
-
-		imshow(windowName, startBackground);
-		cvWaitKey(100);
-	}
-}
-
+//OpenCV鼠标回调函数
 static void menuOnMouse(int EVENT, int x, int y, int flags, void *userdata)
 {
 	Point *p = (Point *)userdata;
