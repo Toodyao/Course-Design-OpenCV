@@ -35,8 +35,7 @@ void gameFramwork(); //OpenCV改写
 void initPlayer(struct PLAYER *player1, struct PLAYER *player2);
 void initItemToZero();
 void loadAllImages(); //OpenCV改写
-//TODO 准备设置难度，利用重载
-
+void enterName(struct PLAYER * player1); //OpenCV改写
 
 //新的链表函数
 void initItem();
@@ -59,9 +58,8 @@ void drawImage(Mat image, Mat logo, int x, int y);
 
 //界面函数 //OpenCV改写
 void Menu();
-//void changeSettings();
 clock_t Pause(struct PLAYER *player1, struct PLAYER *player2, int *clickFlag, int time);
-//void Help();
+void Help();
 void Rank();
 int returnToMenu(int *clickFlag);
 void Exit();
@@ -90,13 +88,14 @@ void Move();
 static void menuOnMouse(int EVENT, int x, int y, int flags, void *userdata);
 static void gameOnMouse(int EVENT, int x, int y, int flags, void *userdata);
 static void overOnMouse(int EVENT, int x, int y, int flags, void *userdata);
+static void returnOnMouse(int EVENT, int x, int y, int flags, void *userdata);
 
 int ItemCount = 0;
 const int ItemNumber = 10;//屏幕上物品的总数
 
-Mat allBackground(600, 800, CV_8UC3, Scalar(0, 0, 0)), startBackground(600, 800, CV_8UC3, Scalar(0, 0, 0)), startBackgroundBackUp, overBackground(600, 800, CV_8UC3, Scalar(0, 0, 0));
-Mat start_b_h, start_b_n, help_b_h, help_b_n, mode_b_h, mode_b_n, settings_b_h, settings_b_n, rank_b_h, rank_b_n, exit_b_h, exit_b_n, single, single_n, select_;
-Mat start_m, help_m, mode_m, settings_m, rank_m, exit_m, single_m, select_m;
+Mat allBackground(600, 800, CV_8UC3, Scalar(0, 0, 0)), startBackground(600, 800, CV_8UC3, Scalar(0, 0, 0)), startBackgroundBackUp, overBackground(600, 800, CV_8UC3, Scalar(0, 0, 0)), rankBackground(600, 800, CV_8UC3, Scalar(255, 255, 255)), helpBackground(600, 800, CV_8UC3, Scalar(255, 255, 255)), enterBackground(600, 800, CV_8UC3, Scalar(255, 255, 255)), whitebkg;
+Mat start_b_h, start_b_n, help_b_h, help_b_n, mode_b_h, mode_b_n, settings_b_h, settings_b_n, rank_b_h, rank_b_n, exit_b_h, exit_b_n, single, single_n, select_, back_b, back_b_m, gstart, gstart_m, gpause, gpause_m;
+Mat start_m, help_m, mode_m, settings_m, rank_m, exit_m, single_m, select_m, first;
 Mat img_player, img_playerR, img_playerS, img_player2, img_player2R, img_player2S, player_m, playerR_m, playerS_m, img_umbrella, img_bomb, img_cake, img_explode, umbrella_m, bomb_m, cake_m, explode_m;
 const String windowName("测试");
 
@@ -128,9 +127,10 @@ void gameFramwork()
 	//界面初始化
 	line(startBackground, Point(0, BORDER), Point(WIDTH, BORDER), Scalar(255, 255, 255));
 	//开始按钮
-	Rect start(30, BORDER + 40, 70, 40);
+	drawTransparent(startBackground, gpause, gpause_m, 30, BORDER + 40);
+	/*Rect start(30, BORDER + 40, 70, 40);
 	rectangle(startBackground, Point(30, BORDER + 40), Point(100, BORDER + 80), Scalar(255, 255, 255));
-	putText(startBackground, String("Pause"), Point(30, BORDER + 40 + 40), CV_FONT_HERSHEY_PLAIN, 1, Scalar(255, 255, 255));
+	putText(startBackground, String("Pause"), Point(30, BORDER + 40 + 40), CV_FONT_HERSHEY_PLAIN, 1, Scalar(255, 255, 255));*/
 	//结束按钮
 	Rect end(150, BORDER + 40, 70, 40);
 	rectangle(startBackground, Point(150, BORDER + 40), Point(150 + 70, BORDER + 80), Scalar(255, 255, 255));
@@ -192,7 +192,10 @@ void initItemToZero()
 void loadAllImages()
 {
 	startBackground = (600, 800, CV_8UC3, Scalar(0, 0, 0));
-	
+	overBackground = imread("img/over.bmp");
+	helpBackground = imread("img/help.jpg");
+	whitebkg = imread("img/white.jpg");
+	//rankBackground = imread("img/rankbackground.bmp");
 	startBackgroundBackUp = imread("img/bkg.png");
 	start_b_h = imread("img/buttons/start_h.bmp");
 	start_b_n = imread("img/buttons/start_n.bmp");
@@ -212,9 +215,16 @@ void loadAllImages()
 	exit_b_h = imread("img/buttons/exit_h.bmp");
 	exit_b_n = imread("img/buttons/exit_n.bmp");
 	exit_m = imread("img/buttons/exit_m.bmp");
+	back_b = imread("img/buttons/back.bmp");
+	back_b_m = imread("img/buttons/back_m.bmp");
+	gstart = imread("img/buttons/gstart.bmp");
+	gstart_m = imread("img/buttons/gstart_m.bmp");
+	gpause = imread("img/buttons/gpause.bmp");
+	gpause_m = imread("img/buttons/gstart_m.bmp");
 
 	select_ = imread("img/buttons/select.bmp");
 	select_m = imread("img/buttons/select_m.bmp");
+	first = imread("img/first.jpg");
 
 	img_player = imread("img/main/player.bmp");
 	img_playerR = imread("img/main/playerR.bmp");
@@ -234,7 +244,48 @@ void loadAllImages()
 	bomb_m = imread("img/main/bomb_m.bmp");
 	cake_m = imread("img/main/cake_m.bmp");
 	explode_m = imread("img/main/explode_m.bmp");
+}
 
+void enterName(struct PLAYER * player1)
+{
+	int i = 0;
+	char c = 0;
+	char name[13] = { '\0' };
+	int charCount = 0;
+	
+	for (i = 0; i < 10; i++)
+	{
+		putText(enterBackground, String("Enter Name: (No more than 9 words)"), Point(30, 70 + 100), CV_FONT_HERSHEY_PLAIN, 2.5, Scalar(0, 0, 0));
+		line(enterBackground, Point(100, 260), Point(300, 260), Scalar(0, 0, 0));
+		putText(enterBackground, String("Press ENTER to start the game."), Point(50, 300), CV_FONT_HERSHEY_PLAIN, 2, Scalar(0, 0, 0));
+		imshow(windowName, enterBackground);
+		enterBackground = (600, 800, CV_8UC3, Scalar(255, 255, 255));
+		c = waitKey(0);
+		if (c == 13)//回车
+		{
+			name[i] = '\0';
+			strcpy(player1->name, name);
+			return;
+		}
+		if (c == 8)//退格
+		{
+			if (i == 0) //健壮性
+			{
+				i--;
+				continue;
+			}
+			name[--i] = '\0';
+			putText(enterBackground, (String)name, Point(100, 260), CV_FONT_HERSHEY_PLAIN, 2, Scalar(0, 0, 0));
+			imshow(windowName, enterBackground);
+			i--;
+			continue;
+		}
+		name[i] = c;
+		putText(enterBackground, (String)name, Point(100, 260), CV_FONT_HERSHEY_PLAIN, 2, Scalar(0, 0, 0));
+	}
+	name[i] = '\0';
+	strcpy(player1->name, name);
+	return;
 }
 
 //新的链表函数
@@ -380,14 +431,12 @@ void drawScore(int score, int score2)
 
 void drawPlayerName(struct PLAYER *player, struct PLAYER *player2)
 {
-	//RECT playerNameAera = { WIDTH - 300, BORDER + 80 - 20, WIDTH - 150, BORDER + 120 - 20 };
-	putText(startBackground, player->name, Point(WIDTH - 240, BORDER + 120 - 20), CV_FONT_HERSHEY_PLAIN, 1, Scalar(255, 255, 255));
+	//玩家1或AI
+	putText(startBackground, player->name, Point(WIDTH - 230, BORDER + 120 - 20), CV_FONT_HERSHEY_PLAIN, 1, Scalar(255, 255, 255));
+
 	//玩家2	
 	if (settings.mode == 2)
-	{
 		putText(startBackground, player->name, Point(WIDTH - 120, BORDER + 120 - 20), CV_FONT_HERSHEY_PLAIN, 1, Scalar(255, 255, 255));
-		//RECT playerNameAera2 = { WIDTH - 180, BORDER + 80 - 20, WIDTH - 30, BORDER + 120 - 20 };
-	}
 }
 
 void drawTime(int time)
@@ -402,26 +451,27 @@ void drawTime(int time)
 
 int drawOver(struct PLAYER *player1, struct PLAYER *player2)
 {
-	overBackground = (600, 800, CV_8UC3, Scalar(0, 0, 0));
 	int clickFlag = 0;
-	setMouseCallback(windowName, overOnMouse, &clickFlag);
+	
+	char score[20] = { '\0' };
+	sprintf(score, "Your score is: %d", player1->score);
 	while (1)
 	{
-		char score[20] = { '\0' };
-		sprintf(score, "Your score is: %d", player1->score);
-		putText(overBackground, String("Game Over"), Point(300, 300), CV_FONT_HERSHEY_PLAIN, 1, Scalar(255, 255, 255));
-		putText(overBackground, (String)score, Point(300, 320), CV_FONT_HERSHEY_PLAIN, 1, Scalar(255, 255, 255));
-
-		//RECT saveScore = { 200, 400, 200 + 100, 400 + 40 };
+		setMouseCallback(windowName, overOnMouse, &clickFlag);
+		putText(overBackground, (String)score, Point(325, 320), CV_FONT_HERSHEY_PLAIN, 1, Scalar(255, 255, 255));
 		putText(overBackground, String("Save Score"), Point(200, 400 + 40), CV_FONT_HERSHEY_PLAIN, 1, Scalar(255, 255, 255));
-
-		//RECT toMenu = { 200 + 110, 400, 200 + 100 + 110, 400 + 40 };
+		putText(overBackground, String("Show Rank"), Point(200, 400 + 40 + 40), CV_FONT_HERSHEY_PLAIN, 1, Scalar(255, 255, 255));
 		putText(overBackground, String("Return To Menu"), Point(200 + 110, 400 + 40), CV_FONT_HERSHEY_PLAIN, 1, Scalar(255, 255, 255));
 
 		if (clickFlag == 1)
 			return 1;
 		if (clickFlag == 2)
 			Save(player1);
+		if (clickFlag == 3)
+		{
+			setMouseCallback(windowName, NULL, NULL);
+			Rank();
+		}
 		clickFlag = 0;
 		imshow(windowName, overBackground);
 		waitKey(33);
@@ -537,11 +587,13 @@ clock_t Pause(struct PLAYER *player1, struct PLAYER *player2, int *clickFlag, in
 	{
 		drawBackground();
 		gameFramwork();
-		putText(startBackground, String("Continue"), Point(30, BORDER + 40 + 40), CV_FONT_HERSHEY_PLAIN, 1, Scalar(255, 255, 255));
+		drawTransparent(startBackground, gstart, gstart_m, 30, BORDER + 40);
+		drawPlayer(player1, 3);
+		if(settings.mode == 2)
+			drawPlayer2(player2, 3);
 		drawPlayerName(player1, player2);
 		drawScore(player1->score, player2->score);
 		drawTime(time);
-		//暂停图片
 		imshow(windowName, startBackground);
 		waitKey(33);
 	}
@@ -550,9 +602,34 @@ clock_t Pause(struct PLAYER *player1, struct PLAYER *player2, int *clickFlag, in
 	return (pauseEndTime - pauseStartTime);
 }
 
+void Help()
+{
+	int clickFlag = 0;
+	setMouseCallback(windowName, returnOnMouse, &clickFlag);
+	while (1)
+	{
+		drawTransparent(helpBackground, back_b, back_b_m, 340, HEIGHT - 70);
+		imshow(windowName, helpBackground);
+		waitKey(33);
+		if (clickFlag == 1)
+			return;
+	}
+}
+
 void Rank()
 {
-
+	rankBackground = (600, 800, CV_8UC3, Scalar(255, 255, 255));
+	int clickFlag = 0;
+	setMouseCallback(windowName, returnOnMouse, &clickFlag);
+	while (1)
+	{
+		rectangle(rankBackground, Rect(0, 0, 800, 100), Scalar(204, 153, 0), -1);
+		putText(rankBackground, String("Ranking"), Point(10, 70), CV_FONT_HERSHEY_TRIPLEX, 2.5, Scalar(255, 255, 255));
+		showScore();
+		drawTransparent(rankBackground, back_b, back_b_m, 340, HEIGHT - 70);
+		if (clickFlag == 1)
+			return;
+	}
 }
 
 int returnToMenu(int *clickFlag)
@@ -596,17 +673,12 @@ void gameStart()
 	int clickFlag = 0;
 	setMouseCallback(windowName, gameOnMouse, &clickFlag);
 
-	/*switch (settings.mode)
+	switch (settings.mode)
 	{
-	case 1:	InputBox((LPTSTR)&(player1->name), 10, (LPCTSTR)"请输入名字："); break;
-	case 2: {
-	InputBox((LPTSTR)&(player1->name), 10, (LPCTSTR)"请输入玩家1的名字：");
-	InputBox((LPTSTR)&(player2->name), 10, (LPCTSTR)"请输入玩家2的名字：");
+	case 1:	enterName(player1); break;
+	case 2: {strcpy(player1->name, "Player1"); strcpy(player2->name, "Player2");}break;
+	case 3:	strcpy(player1->name, "AI"); break;
 	}
-	break;
-	case 3:	player1->name[0] = 'A'; player1->name[1] = 'I'; player1->name[2] = '\0'; break;
-	}*/
-
 	while (1)
 	{
 
@@ -832,7 +904,7 @@ void Save(struct PLAYER *player)
 	putText(overBackground, String("Saved Successfully."), Point(50, 50), CV_FONT_HERSHEY_PLAIN, 1, Scalar(255, 255, 255));
 	imshow(windowName, overBackground);
 	waitKey(33);
-	showScore();
+	//showScore();
 }
 
 void showScore()
@@ -848,8 +920,8 @@ void showScore()
 	if (fopen_s(&fp, "data", "ab+"))
 	//if ((fp = fopen("data", "ab+")) != NULL)
 	{
-		putText(overBackground, String("File Reading Failed."), Point(50, 50), CV_FONT_HERSHEY_PLAIN, 1, Scalar(255, 255, 255));
-		imshow(windowName, overBackground);
+		putText(rankBackground, String("File Reading Failed."), Point(50, 50), CV_FONT_HERSHEY_PLAIN, 1, Scalar(0, 0, 0));
+		imshow(windowName, rankBackground);
 		waitKey(33);
 		return;
 	}
@@ -867,13 +939,13 @@ void showScore()
 	for (int i = 0; i < lineCount; i++)
 	{
 		sprintf(rankLine[i], "%-2d: Name: %-10s, Score: %d", i + 1, pplayer[i].name, pplayer[i].score);
-		putText(overBackground, (String)rankLine[i], Point(50, 100 + i * 20), CV_FONT_HERSHEY_PLAIN, 1, Scalar(255, 255, 255));
+		putText(rankBackground, (String)rankLine[i], Point(230, 150 + i * 40), CV_FONT_HERSHEY_PLAIN, 1.2, Scalar(0, 0, 0));
 	}
 	fclose(fp);
 	
 	rewriteScore(pplayer, lineCount);
 
-	imshow(windowName, overBackground);
+	imshow(windowName, rankBackground);
 	waitKey(33);
 	free(pplayer);
 	pplayer = NULL;
@@ -1001,8 +1073,8 @@ static void menuOnMouse(int EVENT, int x, int y, int flags, void *userdata)
 		p->y = 120 + 70;
 		if (EVENT == EVENT_LBUTTONDOWN)
 		{
-			/*setMouseCallback(windowName, NULL, NULL);
-			gameStart();*/
+			setMouseCallback(windowName, NULL, NULL);
+			Help();
 		}
 	}
 	else if (250 <= x && x <= 250 + 300 && 120 + 70 + 70 <= y && y <= 120 + 70 + 70 + 71) //设置
@@ -1059,7 +1131,7 @@ static void menuOnMouse(int EVENT, int x, int y, int flags, void *userdata)
 		if (EVENT == EVENT_LBUTTONDOWN)
 		{
 			setMouseCallback(windowName, NULL, NULL);
-			showScore();
+			Rank();
 		}
 	}
 	else if (250 <= x && x <= 250 + 300 && 120 + 70 + 70 + 70 + 70 + 70 <= y && y <= 120 + 70 + 70 + 70 + 70 + 70 + 71) //退出
@@ -1096,9 +1168,17 @@ static void gameOnMouse(int EVENT, int x, int y, int flags, void *userdata)
 static void overOnMouse(int EVENT, int x, int y, int flags, void *userdata)
 {
 	int *clickFlag = (int *)userdata;
-	if ((200 + 110) <= x && x <= (200 + 100 + 110) && 400 <= y && y <= (400 + 40) && EVENT == EVENT_LBUTTONDOWN)
+	if (200 + 110 <= x && x <= (200 + 110 + 130) && 400 <= y && y <= (400 + 40) && EVENT == EVENT_LBUTTONDOWN) //返回
 		*clickFlag = 1;
-	if ((200) <= x && x <= (200 + 100) && 400 <= y && y <= (400 + 40) && EVENT == EVENT_LBUTTONDOWN)
+	if (200 <= x && x <= (200 + 100) && 400 <= y && y <= (400 + 40) && EVENT == EVENT_LBUTTONDOWN) // 保存
 		*clickFlag = 2;
+	if (200 <= x && x <= (200 + 100) && 400 + 60 <= y && y <= (400 + 40 + 40) && EVENT == EVENT_LBUTTONDOWN) // 显示排行榜
+		*clickFlag = 3;
+}
 
+static void returnOnMouse(int EVENT, int x, int y, int flags, void *userdata)
+{
+	int *clickFlag = (int *)userdata;
+	if (340 <= x && x <= 340 + 120 && HEIGHT - 70 <= y && y <= HEIGHT - 70 + 59 && EVENT == EVENT_LBUTTONDOWN) //返回
+		*clickFlag = 1;
 }
