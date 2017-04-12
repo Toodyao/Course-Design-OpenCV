@@ -40,7 +40,7 @@ enum MOUSE_POSITION {
 };
 
 
-struct SPEED { //TODO 填写速度,后期设置难度,可以改速度
+struct SPEED {
 	double player;
 	double cake;
 	double umbrella;
@@ -60,6 +60,7 @@ struct Settings {
 	int mode; //模式 1为单人，2为双人，3为AI
 	int time; //游戏时间
 };
+
 //新的数据结构
 typedef struct item_list {
 	struct ITEM *this_item;
@@ -82,9 +83,9 @@ struct item_list *curr_list;
 
 struct SPEED speed = {//初始化速度
 	5,//player
-	1,//cake
-	4,//umbrella
-	3//bomb
+	3,//cake
+	5,//umbrella
+	1.5//bomb
 };
 
 struct Settings settings = { //默认设置

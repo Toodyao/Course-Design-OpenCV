@@ -97,7 +97,7 @@ const int ItemNumber = 10;//屏幕上物品的总数
 Mat allBackground(600, 800, CV_8UC3, Scalar(0, 0, 0)), startBackground(600, 800, CV_8UC3, Scalar(0, 0, 0)), startBackgroundBackUp, overBackground(600, 800, CV_8UC3, Scalar(0, 0, 0));
 Mat start_b_h, start_b_n, help_b_h, help_b_n, mode_b_h, mode_b_n, settings_b_h, settings_b_n, rank_b_h, rank_b_n, exit_b_h, exit_b_n, single, single_n, select_;
 Mat start_m, help_m, mode_m, settings_m, rank_m, exit_m, single_m, select_m;
-Mat img_player, img_playerR, img_playerS, img_player2, img_player2R, img_player2S, player_m, playerR_m, playerS_m, img_umbrella, img_bomb, img_cake, umbrella_m, bomb_m, cake_m;
+Mat img_player, img_playerR, img_playerS, img_player2, img_player2R, img_player2S, player_m, playerR_m, playerS_m, img_umbrella, img_bomb, img_cake, img_explode, umbrella_m, bomb_m, cake_m, explode_m;
 const String windowName("测试");
 
 int main()
@@ -222,16 +222,18 @@ void loadAllImages()
 	img_player2 = imread("img/main/player2.bmp");
 	img_player2R = imread("img/main/player2R.bmp");
 	img_player2S = imread("img/main/player2S.bmp");
-	img_umbrella = imread("img/main/umbrella.bmp");
 	player_m = imread("img/main/player_m.bmp");
 	playerR_m = imread("img/main/playerR_m.bmp");
 	playerS_m = imread("img/main/playerS_m.bmp");
 
 	img_bomb = imread("img/main/bomb.bmp");
 	img_cake = imread("img/main/cake.bmp");
+	img_umbrella = imread("img/main/umbrella.bmp");
+	img_explode = imread("img/main/explode.bmp");
 	umbrella_m = imread("img/main/umbrella_m.bmp");
 	bomb_m = imread("img/main/bomb_m.bmp");
 	cake_m = imread("img/main/cake_m.bmp");
+	explode_m = imread("img/main/explode_m.bmp");
 
 }
 
@@ -321,39 +323,24 @@ void drawItem(struct ITEM *item)
 	switch (item->type)
 	{
 	case UMBRELLA:
-		//TODO 取消了-20
 		//circle(startBackground, Point((int)item->x, (int)item->y), 20, Scalar(255, 255, 255));
 		drawTransparent(startBackground, img_umbrella, umbrella_m, (int)item->x, (int)item->y);
-
 		break;
 	case CAKE:
 		//circle(startBackground, Point((int)item->x, (int)item->y), 20, Scalar(255, 255, 255));
 		drawTransparent(startBackground, img_cake, cake_m, (int)item->x, (int)item->y);
-
 		break;
 	case BOMB:
 		//circle(startBackground, Point((int)item->x, (int)item->y), 20, Scalar(255, 255, 255));
 		drawTransparent(startBackground, img_bomb, bomb_m, (int)item->x, (int)item->y);
-
 		break;
 	}
 }
 
 void coverItem(int x, int y, enum TYPE type)
 {
-	// TODO 待修改
-	switch (type)
-	{
-	case UMBRELLA:
-
-		break;
-	case CAKE:
-
-		break;
-	case BOMB:
-
-		break;
-	}
+	if (type == BOMB)
+		drawTransparent(startBackground, img_explode, explode_m, x, y);
 }
 
 void drawPlayer(struct PLAYER *player, int direction)
@@ -407,7 +394,10 @@ void drawTime(int time)
 {
 	char a[5] = { '\n' };
 	sprintf(a, "%d", time);
-	putText(startBackground, a, Point(270, BORDER + 40), CV_FONT_HERSHEY_PLAIN, 1, Scalar(255, 255, 255));
+	if(time <= 10)
+		putText(startBackground, a, Point(270, BORDER + 40), CV_FONT_HERSHEY_PLAIN, 1.5, Scalar(0, 0, 255), 2);
+	else
+		putText(startBackground, a, Point(270, BORDER + 40), CV_FONT_HERSHEY_PLAIN, 1, Scalar(255, 255, 255));
 }
 
 int drawOver(struct PLAYER *player1, struct PLAYER *player2)
@@ -473,6 +463,12 @@ void Menu()
 		//RECT mode = { 350, 240, 350 + 100, 240 + 50 };
 		drawTransparent(startBackground, settings_b_h, settings_m, 250, 120 + 70 + 70);
 
+		switch (settings.difficult)
+		{
+		case 1:drawTransparent(startBackground, select_, select_m, 400 - 280 - 100, 120 + 70 + 70 + 70 + 10); break;
+		case 2:drawTransparent(startBackground, select_, select_m, 400 - 170 - 100, 120 + 70 + 70 + 70 + 10); break;
+		case 3:drawTransparent(startBackground, select_, select_m, 400 - 60 - 100, 120 + 70 + 70 + 70 + 10); break;
+		}
 		switch (settings.mode)
 		{
 		case 1:drawTransparent(startBackground, select_, select_m, 460, 120 + 70 + 70 + 70 + 10); break;
@@ -493,6 +489,21 @@ void Menu()
 		Rect ai(680, 120 + 70 + 70 + 70 + 10, 100, 50);
 		rectangle(startBackground, ai, Scalar(255, 255, 255));
 		putText(startBackground, String("AI"), Point(680 + 40, 120 + 70 + 70 + 70 + 10 + 30), CV_FONT_HERSHEY_PLAIN, 1.2, Scalar(255, 255, 255));
+
+		//困难
+		Rect difficult(400 - 60 - 100, 120 + 70 + 70 + 70 + 10, 100, 50);
+		rectangle(startBackground, difficult, Scalar(255, 255, 255));
+		putText(startBackground, String("Difficult"), Point(400 - 60 - 100, 120 + 70 + 70 + 70 + 10 + 30), CV_FONT_HERSHEY_PLAIN, 1.2, Scalar(255, 255, 255));
+
+		//中等
+		Rect medium(400 - 170 - 100, 120 + 70 + 70 + 70 + 10, 100, 50);
+		rectangle(startBackground, medium, Scalar(255, 255, 255));
+		putText(startBackground, String("Medium"), Point(400 - 170 - 100, 120 + 70 + 70 + 70 + 10 + 30), CV_FONT_HERSHEY_PLAIN, 1.1, Scalar(255, 255, 255));
+
+		//简单
+		Rect easy(400 - 280 - 100, 120 + 70 + 70 + 70 + 10, 100, 50);
+		rectangle(startBackground, easy, Scalar(255, 255, 255));
+		putText(startBackground, String("Easy"), Point(400 - 280 - 100, 120 + 70 + 70 + 70 + 10 + 30), CV_FONT_HERSHEY_PLAIN, 1.2, Scalar(255, 255, 255));
 
 		//排名
 		//RECT rank = { 350, 300, 350 + 100, 300 + 50 };
@@ -598,7 +609,8 @@ void gameStart()
 
 	while (1)
 	{
-		for (int i = ItemNumber - ItemCount; i > 0; i--)
+
+		if(rand() % 20 == 1 && ItemNumber - ItemCount)
 			addItem();
 
 		//画背景和框架
@@ -627,7 +639,7 @@ void gameStart()
 			pauseTime += Pause(player1, player2, &clickFlag, countDown(startTime, pauseTime));
 
 			judgeState(item, player1);
-			if (settings.mode != 3 && judgeOver(player1, player2, countDown(startTime, pauseTime)))
+			if (judgeOver(player1, player2, countDown(startTime, pauseTime)))
 				return;
 			if (settings.mode == 2)
 				judgeState(item, player2);
@@ -638,7 +650,7 @@ void gameStart()
 
 			if (delItem())
 			{
-				//coverItem(temp_x, temp_y, temp_type);
+				coverItem(temp_x, temp_y, temp_type);
 			}
 			else {
 				itemMove(item);
@@ -663,7 +675,6 @@ void gameStart()
 //判断函数
 void judgeState(struct ITEM *item, struct PLAYER *player)
 {
-	//TODO 取消-20
 	if (item->y >= 480 - 70 - speed.umbrella)
 	{
 		item->state = OFF_SCREEN;
@@ -676,13 +687,13 @@ void judgeState(struct ITEM *item, struct PLAYER *player)
 		if (item->type == CAKE)
 			player->score += 10;
 		if (item->type == BOMB)
-			player->life = 0; //TODO 减一
+			player->life = 0; 
 	}
 }
 
 int judgeOver(struct PLAYER *player1, struct PLAYER *player2, int time)
 {
-	if (player1->life == 0 || player2->life == 0 || time == 0)
+	if ((settings.mode != 3 && (player1->life == 0 || player2->life == 0)) || time == 0)
 	{
 		setMouseCallback(windowName, NULL, NULL);
 		if (drawOver(player1, player2))
@@ -899,15 +910,34 @@ int countDown(clock_t startTime, clock_t pauseTime)
 enum TYPE randomType()
 {
 	int randomNumber = rand() % 100;
-	if (settings.mode == 1)
+	if (settings.difficult == 1)
 	{
-		if (randomNumber <= 15)
+		if (randomNumber <= 10)
 			return BOMB;
 		else if (randomNumber <= 50)
 			return UMBRELLA;
 		else
 			return CAKE;
 	}
+	if (settings.difficult == 2)
+	{
+		if (randomNumber <= 20)
+			return BOMB;
+		else if (randomNumber <= 50)
+			return UMBRELLA;
+		else
+			return CAKE;
+	}
+	if (settings.difficult == 3)
+	{
+		if (randomNumber <= 40)
+			return BOMB;
+		else if (randomNumber <= 70)
+			return UMBRELLA;
+		else
+			return CAKE;
+	}
+	return CAKE;
 }
 
 //OpenCV 独有
@@ -979,39 +1009,48 @@ static void menuOnMouse(int EVENT, int x, int y, int flags, void *userdata)
 	{
 		p->x = 250;
 		p->y = 120 + 70 + 70;
-		if (EVENT == EVENT_LBUTTONDOWN)
-		{
-			/*setMouseCallback(windowName, NULL, NULL);
-			gameStart();*/
-		}
 	}
 	else if (460 <= x && x <= 460 + 100 && 120 + 70 + 70 + 70 + 10 <= y && y <= 120 + 70 + 70 + 70 + 10 + 50) //单人
 	{
 		p->x = 460;
 		p->y = 120 + 70 + 70 + 70 + 10;
 		if (EVENT == EVENT_LBUTTONDOWN)
-		{
 			settings.mode = 1;
-		}
 	}
 	else if (570 <= x && x <= 570 + 100 && 120 + 70 + 70 + 70 + 10 <= y && y <= 120 + 70 + 70 + 70 + 10 + 50) //双人
 	{
 		p->x = 570;
 		p->y = 120 + 70 + 70 + 70 + 10;
 		if (EVENT == EVENT_LBUTTONDOWN)
-		{
 			settings.mode = 2;
-		}
 	}
 	else if (680 <= x && x <= 680 + 100 && 120 + 70 + 70 + 70 + 10 <= y && y <= 120 + 70 + 70 + 70 + 10 + 50) //AI
 	{
 		p->x = 680;
 		p->y = 120 + 70 + 70 + 70 + 10;
 		if (EVENT == EVENT_LBUTTONDOWN)
-		{
 			settings.mode = 3;
-			//circle(startBackground, Point(680, 240), 10, Scalar(255, 255, 255), 3);
-		}
+	}
+	else if (400 - 60 - 100 <= x && x <= 400 - 60 - 100 + 100 && 120 + 70 + 70 + 70 + 10 <= y && y <= 120 + 70 + 70 + 70 + 10 + 50) //困难
+	{
+		p->x = 400 - 60 - 100;
+		p->y = 120 + 70 + 70 + 70 + 10;
+		if (EVENT == EVENT_LBUTTONDOWN)
+			settings.difficult = 3;
+	}
+	else if (400 - 170 - 100 <= x && x <= 400 - 170 - 100 + 100 && 120 + 70 + 70 + 70 + 10 <= y && y <= 120 + 70 + 70 + 70 + 10 + 50) //中等
+	{
+		p->x = 400 - 170 - 100;
+		p->y = 120 + 70 + 70 + 70 + 10;
+		if (EVENT == EVENT_LBUTTONDOWN)
+			settings.difficult = 2;
+	}
+	else if (400 - 280 - 100 <= x && x <= 400 - 280 - 100 + 100 && 120 + 70 + 70 + 70 + 10 <= y && y <= 120 + 70 + 70 + 70 + 10 + 50) //简单
+	{
+		p->x = 400 - 280 - 100;
+		p->y = 120 + 70 + 70 + 70 + 10;
+		if (EVENT == EVENT_LBUTTONDOWN)
+			settings.difficult = 1;
 	}
 	else if (250 <= x && x <= 250 + 300 && 120 + 70 + 70 + 70 + 70 <= y && y <= 120 + 70 + 70 + 70 + 70 + 71) //排名
 	{
