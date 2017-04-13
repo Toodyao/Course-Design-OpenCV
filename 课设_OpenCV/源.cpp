@@ -450,9 +450,11 @@ int drawOver(struct PLAYER *player1, struct PLAYER *player2)
 		sprintf(score, "Player1's score is: %d", player1->score);
 		sprintf(score2, "Player2's score is: %d", player2->score);
 	}
+
+	overBackground = (600, 800, CV_8UC3, Scalar(0, 0, 0));
+	drawImage(overBackground, overBackgroundBackUp, 0, 0);
 	while (1)
 	{
-		overBackground = overBackgroundBackUp;
 		setMouseCallback(windowName, overOnMouse, &clickFlag);
 		putText(overBackground, (String)score, Point(325, 320), CV_FONT_HERSHEY_PLAIN, 1, Scalar(255, 255, 255));
 		if(settings.mode == 2)
@@ -642,7 +644,7 @@ void Exit()
 
 void drawBackground()
 {
-	startBackground = (600, 800, CV_8UC3, Scalar(0, 0, 0)); //将startBackground重置为背景图，相当于画了一遍背景，因为不知道overlayImage()效率如何
+	startBackground = (600, 800, CV_8UC3, Scalar(0, 0, 0)); //将startBackground重置为背景图，相当于画了一遍背景
 	drawImage(startBackground, startBackgroundBackUp, 0, 0);
 }
 
