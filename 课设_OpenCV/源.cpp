@@ -441,8 +441,8 @@ int drawOver(struct PLAYER *player1, struct PLAYER *player2)
 {
 	int clickFlag = 0;
 	
-	char score[20] = { '\0' };
-	char score2[20] = { '\0' };
+	char score[30] = { '\0' };
+	char score2[30] = { '\0' };
 	if(settings.mode != 2)
 		sprintf(score, "Your score is: %d", player1->score);
 	else
@@ -456,7 +456,7 @@ int drawOver(struct PLAYER *player1, struct PLAYER *player2)
 		setMouseCallback(windowName, overOnMouse, &clickFlag);
 		putText(overBackground, (String)score, Point(325, 320), CV_FONT_HERSHEY_PLAIN, 1, Scalar(255, 255, 255));
 		if(settings.mode == 2)
-			putText(overBackground, (String)score2, Point(325, 330), CV_FONT_HERSHEY_PLAIN, 1, Scalar(255, 255, 255));
+			putText(overBackground, (String)score2, Point(325, 345), CV_FONT_HERSHEY_PLAIN, 1, Scalar(255, 255, 255));
 		putText(overBackground, String("Save Score"), Point(200, 400 + 40), CV_FONT_HERSHEY_PLAIN, 1, Scalar(255, 255, 255));
 		putText(overBackground, String("Show Rank"), Point(200, 400 + 40 + 40), CV_FONT_HERSHEY_PLAIN, 1, Scalar(255, 255, 255));
 		putText(overBackground, String("Return To Menu"), Point(200 + 110, 400 + 40), CV_FONT_HERSHEY_PLAIN, 1, Scalar(255, 255, 255));
