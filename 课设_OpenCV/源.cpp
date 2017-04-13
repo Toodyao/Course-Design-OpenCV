@@ -91,7 +91,7 @@ static void returnOnMouse(int EVENT, int x, int y, int flags, void *userdata);
 int ItemCount = 0;
 const int ItemNumber = 10;//屏幕上物品的总数
 
-Mat allBackground(600, 800, CV_8UC3, Scalar(0, 0, 0)), startBackground(600, 800, CV_8UC3, Scalar(0, 0, 0)), startBackgroundBackUp, overBackground(600, 800, CV_8UC3, Scalar(0, 0, 0)), rankBackground(600, 800, CV_8UC3, Scalar(255, 255, 255)), helpBackground(600, 800, CV_8UC3, Scalar(255, 255, 255)), enterBackground(600, 800, CV_8UC3, Scalar(255, 255, 255)), title, title_m;
+Mat allBackground(600, 800, CV_8UC3, Scalar(0, 0, 0)), startBackground(600, 800, CV_8UC3, Scalar(0, 0, 0)), startBackgroundBackUp, overBackground(600, 800, CV_8UC3, Scalar(0, 0, 0)), overBackgroundBackUp, rankBackground(600, 800, CV_8UC3, Scalar(255, 255, 255)), helpBackground(600, 800, CV_8UC3, Scalar(255, 255, 255)), enterBackground(600, 800, CV_8UC3, Scalar(255, 255, 255)), title, title_m;
 Mat start_b_h, start_b_n, help_b_h, help_b_n, mode_b_h, mode_b_n, settings_b_h, settings_b_n, rank_b_h, rank_b_n, exit_b_h, exit_b_n, single, single_n, select_, back_b, back_b_m, gstart, gstart_m, gpause, gpause_m;
 Mat start_m, help_m, mode_m, settings_m, rank_m, exit_m, single_m, select_m, first;
 Mat img_player, img_playerR, img_playerS, img_player2, img_player2R, img_player2S, player_m, playerR_m, playerS_m, img_umbrella, img_bomb, img_cake, img_explode, umbrella_m, bomb_m, cake_m, explode_m;
@@ -188,6 +188,7 @@ void loadAllImages()
 {
 	startBackground = (600, 800, CV_8UC3, Scalar(0, 0, 0));
 	overBackground = imread("img/over.bmp");
+	overBackgroundBackUp = imread("img/over.bmp");
 	helpBackground = imread("img/help.jpg");
 	title = imread("img/title.bmp");
 	title_m = imread("img/title_m.bmp");
@@ -441,11 +442,21 @@ int drawOver(struct PLAYER *player1, struct PLAYER *player2)
 	int clickFlag = 0;
 	
 	char score[20] = { '\0' };
-	sprintf(score, "Your score is: %d", player1->score);
+	char score2[20] = { '\0' };
+	if(settings.mode != 2)
+		sprintf(score, "Your score is: %d", player1->score);
+	else
+	{
+		sprintf(score, "Player1's score is: %d", player1->score);
+		sprintf(score2, "Player2's score is: %d", player2->score);
+	}
 	while (1)
 	{
+		overBackground = overBackgroundBackUp;
 		setMouseCallback(windowName, overOnMouse, &clickFlag);
 		putText(overBackground, (String)score, Point(325, 320), CV_FONT_HERSHEY_PLAIN, 1, Scalar(255, 255, 255));
+		if(settings.mode == 2)
+			putText(overBackground, (String)score2, Point(325, 330), CV_FONT_HERSHEY_PLAIN, 1, Scalar(255, 255, 255));
 		putText(overBackground, String("Save Score"), Point(200, 400 + 40), CV_FONT_HERSHEY_PLAIN, 1, Scalar(255, 255, 255));
 		putText(overBackground, String("Show Rank"), Point(200, 400 + 40 + 40), CV_FONT_HERSHEY_PLAIN, 1, Scalar(255, 255, 255));
 		putText(overBackground, String("Return To Menu"), Point(200 + 110, 400 + 40), CV_FONT_HERSHEY_PLAIN, 1, Scalar(255, 255, 255));
